@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Block, BlockTitle, Button, Link, List, ListButton, ListInput, Navbar, NavbarBackLink } from 'konsta/react'
+import { Block, BlockTitle, Button, Link, List, ListButton, ListInput, NavbarBackLink } from 'konsta/react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Play, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -18,6 +18,7 @@ import {
 import { ExerciseThumb } from './ExerciseMedia'
 import { ExercisePicker } from './ExercisePicker'
 import { useExerciseMap, useExerciseName } from './hooks'
+import { Navbar } from '../../ui/Navbar'
 
 export function RoutinePage() {
   const { t } = useTranslation()

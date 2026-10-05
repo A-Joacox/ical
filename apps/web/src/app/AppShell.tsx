@@ -8,6 +8,7 @@ import { ExercisesPage } from '../features/gym/ExercisesPage'
 import { GymPage } from '../features/gym/GymPage'
 import { RoutinePage } from '../features/gym/RoutinePage'
 import { WorkoutPage } from '../features/gym/WorkoutPage'
+import { ServerPage } from '../features/server/ServerPage'
 import { SettingsPage } from '../features/settings/SettingsPage'
 import { TodayPage } from '../features/today/TodayPage'
 import { PlaceholderPage } from '../ui/PlaceholderPage'
@@ -42,7 +43,7 @@ export function AppShell() {
         <Route path="/gym/exercises" element={<ExercisesPage />} />
         <Route path="/gym/exercises/:id" element={<ExercisePage />} />
         <Route path="/agenda" element={<PlaceholderPage tone="agenda" Icon={CalendarDays} />} />
-        <Route path="/server" element={<PlaceholderPage tone="server" Icon={Server} />} />
+        <Route path="/server" element={<ServerPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

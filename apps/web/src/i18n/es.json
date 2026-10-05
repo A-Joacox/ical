@@ -18,7 +18,20 @@
   "server": {
     "online": "Online",
     "offline": "Sin conexión",
-    "checking": "Comprobando…"
+    "checking": "Comprobando…",
+    "uptime": "encendido {{time}}",
+    "updated": "Actualizado a las {{time}}",
+    "cachedAt": "datos de las {{time}}",
+    "unavailable": "El monitor (Glances) no responde",
+    "signIn": "Inicia sesión en Ajustes para ver el estado del server.",
+    "cpu": "CPU",
+    "ram": "RAM",
+    "temp": "Temp. máx.",
+    "load": "Carga",
+    "disks": "Discos",
+    "temps": "Temperaturas",
+    "containers": "Contenedores",
+    "noContainers": "No hay contenedores."
   },
   "macros": {
     "protein": "Proteína",
@@ -88,13 +101,14 @@
     "best1RM": "1RM estimado",
     "progress": "Progreso (1RM estimado)",
     "noExerciseHistory": "Todavía no has hecho este ejercicio.",
-    "mediaCredit": "Imágenes: free-exercise-db (dominio público)"
+    "mediaCredit": "Imágenes: free-exercise-db (dominio público)",
+    "restDoneTitle": "Descanso terminado",
+    "restDoneBody": "Hora de la siguiente serie 💪"
   },
   "placeholder": {
     "soon": "Próximamente",
     "food": "Registra tus comidas con foto, código de barras o búsqueda.",
-    "agenda": "Tus eventos de Google Calendar.",
-    "server": "CPU, memoria, temperaturas y contenedores de tu home-server."
+    "agenda": "Tus eventos de Google Calendar."
   },
   "settings": {
     "title": "Ajustes",
@@ -115,6 +129,20 @@
     "addDevice": "Añadir otro dispositivo",
     "signOut": "Cerrar sesión",
     "accountFooter": "La sesión solo hace falta para sincronizar con tu server. La app funciona sin conexión.",
+    "notifications": "Notificaciones",
+    "notificationsOn": "Activadas",
+    "notificationsOff": "Desactivadas",
+    "enableNotifications": "Activar notificaciones",
+    "disableNotifications": "Desactivar notificaciones",
+    "sendTest": "Enviar notificación de prueba",
+    "testTitle": "Self Grow",
+    "testBody": "¡Las notificaciones funcionan!",
+    "testSent": "Enviada. Debería llegarte en unos segundos.",
+    "notificationsFooter": "Aviso de fin de descanso con el iPhone bloqueado y alertas del server: disco lleno, temperatura alta, contenedor detenido o corte de luz.",
+    "notificationsUnsupported": "Para recibir notificaciones, abre la app desde el ícono de la pantalla de inicio (iOS 16.4 o superior).",
+    "notificationsDenied": "Permiso denegado. Actívalo en Ajustes de iOS → Notificaciones → Self Grow.",
+    "notificationsNeedSession": "Inicia sesión en Cuenta para activarlas.",
+    "notificationsServerOff": "El server no tiene configuradas las notificaciones (faltan las claves VAPID).",
     "error": "No se pudo completar. Inténtalo de nuevo."
   }
 }

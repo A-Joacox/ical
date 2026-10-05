@@ -1,4 +1,4 @@
-import { Block, Button, Link, List, ListItem, Navbar } from 'konsta/react'
+import { Block, Button, Link, List, ListItem } from 'konsta/react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { CalendarDays, Dumbbell, Plus, Server, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -11,6 +11,8 @@ import { MacroBars } from '../../ui/MacroBars'
 import { ProgressRing } from '../../ui/ProgressRing'
 import { TabPage } from '../../ui/TabPage'
 import { useServerHealth } from '../server/useServerHealth'
+import { readCachedStatus } from '../server/useServerStatus'
+import { Navbar } from '../../ui/Navbar'
 
 const HEALTH_DOT = { checking: 'bg-label-2', online: 'bg-food', offline: 'bg-danger' } as const
 
@@ -22,6 +24,9 @@ export function TodayPage() {
   const navigate = useNavigate()
   const goals = useGoals()
   const health = useServerHealth()
+  // Temperatura de la última lectura guardada (la pestaña Server la actualiza).
+  const cachedStatus = readCachedStatus()?.status
+  const maxTemp = Math.max(0, ...(cachedStatus?.temps.map((s) => s.value) ?? []))
   const activeWorkout = useActiveWorkout()
   const workoutsToday = useLiveQuery(() =>
     db.workouts
@@ -80,6 +85,7 @@ export function TodayPage() {
             <span className="flex items-center gap-1.5">
               <span className={`h-2 w-2 rounded-full ${HEALTH_DOT[health]}`} />
               {t(`server.${health}`)}
+              {health === 'online' && maxTemp > 0 && ` · ${Math.round(maxTemp)} °C`}
             </span>
           }
           media={<IconBadge Icon={Server} tone="server" />}

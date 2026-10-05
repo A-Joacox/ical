@@ -1,4 +1,4 @@
-import { Block, BlockFooter, BlockTitle, List, ListItem, Navbar, NavbarBackLink } from 'konsta/react'
+import { Block, BlockFooter, BlockTitle, List, ListItem, NavbarBackLink } from 'konsta/react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router'
@@ -10,6 +10,7 @@ import { getExerciseHistory } from './data'
 import { ExerciseAnimation } from './ExerciseMedia'
 import { useExerciseName } from './hooks'
 import { displayWeight, estimate1RM } from './stats'
+import { Navbar } from '../../ui/Navbar'
 
 // Detalle de un ejercicio: animación, récords, progreso e historial.
 export function ExercisePage() {

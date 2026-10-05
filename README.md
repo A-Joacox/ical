@@ -7,7 +7,7 @@ Funnel. La `/api` está protegida con passkey (Face ID).
 ```
 apps/web     PWA (Vite + React + TypeScript)
 apps/server  API + servidor de la PWA (Fastify, Node 24 ejecuta TypeScript directo)
-data/        SQLite del server (passkeys y, más adelante, el backup). No se sube a git.
+data/        SQLite del server (passkeys, suscripciones push y, más adelante, el backup). No se sube a git.
 ```
 
 ## Desarrollo en el PC
@@ -18,7 +18,7 @@ npm run build        # compila la PWA en apps/web/dist
 npm run dev:server   # sirve dist + /api en http://localhost:3000 (lee apps/server/.env si existe)
 npm run dev:web      # Vite con recarga en caliente en http://localhost:5173 (proxy de /api al :3000)
 npm run typecheck
-npm test -w apps/server
+npm test --workspaces
 ```
 
 En local las passkeys usan `localhost`. Para registrar una, crea `apps/server/.env` con solo
@@ -34,12 +34,19 @@ En local las passkeys usan `localhost`. Para registrar una, crea `apps/server/.e
    ```
    y luego `sudo systemctl restart systemd-logind`.
 2. **Configuración:** `cp apps/server/.env.example apps/server/.env` y rellénalo (dominio, secretos).
-3. **Levantar la app:**
+3. **Levantar la app** (también arranca Glances, que lee las métricas del host):
    ```bash
    docker compose up -d --build
    curl http://localhost:3000/api/health
    ```
-4. **Publicarla con Funnel** en la raíz del 443 (la ruta `/webhook` de n8n sigue en el mismo puerto):
+4. **Notificaciones push:** genera las claves VAPID, pégalas en `.env` y reinicia:
+   ```bash
+   docker compose run --rm --no-deps app node -e "console.log(require('web-push').generateVAPIDKeys())"
+   docker compose up -d
+   ```
+   Opcional: para ver la temperatura de la GPU NVIDIA, instala `nvidia-container-toolkit` y
+   descomenta el bloque `deploy` del servicio `glances` en `docker-compose.yml`.
+5. **Publicarla con Funnel** en la raíz del 443 (la ruta `/webhook` de n8n sigue en el mismo puerto):
    ```bash
    sudo tailscale funnel --bg 3000
    tailscale funnel status
@@ -55,3 +62,4 @@ Para actualizar después de cada cambio: `./deploy.sh` (hace `git pull` y recons
 3. Opcional: borra `SETUP_TOKEN` del `.env` y reinicia (`docker compose up -d`) para que nadie más
    pueda registrar dispositivos.
 4. Prueba offline: con la app abierta una vez, activa el modo avión y vuelve a abrirla.
+5. Notificaciones: Ajustes → **Activar notificaciones** → **Enviar notificación de prueba**.

@@ -1,10 +1,12 @@
-import { Block, BlockTitle, List, ListItem, Navbar, NavbarBackLink, Segmented, SegmentedButton } from 'konsta/react'
+import { Block, BlockTitle, List, ListItem, NavbarBackLink, Segmented, SegmentedButton } from 'konsta/react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { saveGoals, saveWeightUnit, useGoals, useWeightUnit, type Goals } from '../../db/settings'
 import { LANGUAGES } from '../../i18n'
 import { TabPage } from '../../ui/TabPage'
 import { AccountSection } from './AccountSection'
+import { NotificationsSection } from './NotificationsSection'
+import { Navbar } from '../../ui/Navbar'
 
 const LANGUAGE_NAMES = { es: 'Español', en: 'English' } as const
 const WEIGHT_UNITS = ['kg', 'lb'] as const
@@ -83,6 +85,7 @@ export function SettingsPage() {
       </List>
 
       <AccountSection />
+      <NotificationsSection />
     </TabPage>
   )
 }

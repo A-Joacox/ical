@@ -10,7 +10,13 @@ export function openDb(file: string) {
       counter INTEGER NOT NULL,
       transports TEXT NOT NULL DEFAULT '[]',
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )
+    );
+    CREATE TABLE IF NOT EXISTS push_subscriptions (
+      endpoint TEXT PRIMARY KEY,
+      keys TEXT NOT NULL,
+      lang TEXT NOT NULL DEFAULT 'es',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `)
   return db
 }

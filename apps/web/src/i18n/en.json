@@ -18,7 +18,20 @@
   "server": {
     "online": "Online",
     "offline": "Offline",
-    "checking": "Checking…"
+    "checking": "Checking…",
+    "uptime": "up {{time}}",
+    "updated": "Updated at {{time}}",
+    "cachedAt": "data from {{time}}",
+    "unavailable": "The monitor (Glances) is not responding",
+    "signIn": "Sign in from Settings to see the server status.",
+    "cpu": "CPU",
+    "ram": "RAM",
+    "temp": "Max temp",
+    "load": "Load",
+    "disks": "Disks",
+    "temps": "Temperatures",
+    "containers": "Containers",
+    "noContainers": "No containers."
   },
   "macros": {
     "protein": "Protein",
@@ -88,13 +101,14 @@
     "best1RM": "Est. 1RM",
     "progress": "Progress (est. 1RM)",
     "noExerciseHistory": "You haven't done this exercise yet.",
-    "mediaCredit": "Images: free-exercise-db (public domain)"
+    "mediaCredit": "Images: free-exercise-db (public domain)",
+    "restDoneTitle": "Rest is over",
+    "restDoneBody": "Time for your next set 💪"
   },
   "placeholder": {
     "soon": "Coming soon",
     "food": "Log your meals with a photo, barcode or search.",
-    "agenda": "Your Google Calendar events.",
-    "server": "CPU, memory, temperatures and containers of your home server."
+    "agenda": "Your Google Calendar events."
   },
   "settings": {
     "title": "Settings",
@@ -115,6 +129,20 @@
     "addDevice": "Add another device",
     "signOut": "Sign out",
     "accountFooter": "Signing in is only needed to sync with your server. The app works offline.",
+    "notifications": "Notifications",
+    "notificationsOn": "On",
+    "notificationsOff": "Off",
+    "enableNotifications": "Turn on notifications",
+    "disableNotifications": "Turn off notifications",
+    "sendTest": "Send test notification",
+    "testTitle": "Self Grow",
+    "testBody": "Notifications are working!",
+    "testSent": "Sent. It should arrive in a few seconds.",
+    "notificationsFooter": "Rest-over alerts while your iPhone is locked, plus server alerts: disk full, high temperature, stopped container or power outage.",
+    "notificationsUnsupported": "To get notifications, open the app from its Home Screen icon (iOS 16.4 or later).",
+    "notificationsDenied": "Permission denied. Enable it in iOS Settings → Notifications → Self Grow.",
+    "notificationsNeedSession": "Sign in under Account to turn them on.",
+    "notificationsServerOff": "Notifications are not configured on the server (missing VAPID keys).",
     "error": "Something went wrong. Please try again."
   }
 }

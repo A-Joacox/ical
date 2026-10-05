@@ -1,5 +1,6 @@
 import type { Table } from 'dexie'
 import { db, newRow } from '../../db/db'
+import { cancelRestPush, scheduleRestPush } from './restPush'
 import { bestSet, estimate1RM } from './stats'
 import type { Muscle, Routine, RoutineExercise, Workout, WorkoutSet } from './types'
 
@@ -139,34 +140,37 @@ export async function removeExerciseFromWorkout(workoutId: string, exerciseOrder
 /** Marca la serie como hecha e inicia el descanso. */
 export async function completeSet(set: WorkoutSet, values: { weightKg?: number; reps: number }) {
   const now = Date.now()
+  const restEndsAt = now + set.restSeconds * 1000
   await db.transaction('rw', db.workoutSets, db.workouts, async () => {
     await db.workoutSets.update(set.id, { ...values, completedAt: now, updatedAt: now })
-    await db.workouts.update(set.workoutId, {
-      restEndsAt: now + set.restSeconds * 1000,
-      restSeconds: set.restSeconds,
-      updatedAt: now,
-    })
+    await db.workouts.update(set.workoutId, { restEndsAt, restSeconds: set.restSeconds, updatedAt: now })
   })
+  scheduleRestPush(restEndsAt)
 }
 
 export const uncompleteSet = (set: WorkoutSet) =>
   db.workoutSets.update(set.id, { completedAt: undefined, updatedAt: Date.now() })
 
-export function adjustRest(workout: Workout, deltaSeconds: number) {
+export async function adjustRest(workout: Workout, deltaSeconds: number) {
   if (!workout.restEndsAt) return
   const now = Date.now()
-  return db.workouts.update(workout.id, {
-    restEndsAt: Math.max(workout.restEndsAt + deltaSeconds * 1000, now),
+  const restEndsAt = Math.max(workout.restEndsAt + deltaSeconds * 1000, now)
+  await db.workouts.update(workout.id, {
+    restEndsAt,
     restSeconds: Math.max((workout.restSeconds ?? 0) + deltaSeconds, 0),
     updatedAt: now,
   })
+  scheduleRestPush(restEndsAt)
 }
 
-export const clearRest = (workoutId: string) =>
-  db.workouts.update(workoutId, { restEndsAt: undefined, restSeconds: undefined, updatedAt: Date.now() })
+export async function clearRest(workoutId: string) {
+  await db.workouts.update(workoutId, { restEndsAt: undefined, restSeconds: undefined, updatedAt: Date.now() })
+  cancelRestPush()
+}
 
 /** Termina el entrenamiento descartando series sin completar. Si no queda ninguna, lo descarta. */
 export async function finishWorkout(workoutId: string) {
+  cancelRestPush()
   return db.transaction('rw', db.workouts, db.workoutSets, async () => {
     const sets = await getWorkoutSets(workoutId)
     const pending = sets.filter((s) => !s.completedAt)
@@ -185,6 +189,7 @@ export async function finishWorkout(workoutId: string) {
 }
 
 export async function deleteWorkout(workoutId: string) {
+  cancelRestPush()
   await db.transaction('rw', db.workouts, db.workoutSets, async () => {
     const sets = await getWorkoutSets(workoutId)
     await softDelete(

@@ -1,8 +1,8 @@
 import type { LucideIcon } from 'lucide-react'
-import { Navbar } from 'konsta/react'
 import { useTranslation } from 'react-i18next'
 import { IconBadge, type Tone } from './IconBadge'
 import { TabPage } from './TabPage'
+import { Navbar } from './Navbar'
 
 // Pestaña de un módulo que todavía no está implementado.
 export function PlaceholderPage({ tone, Icon }: { tone: Tone; Icon: LucideIcon }) {

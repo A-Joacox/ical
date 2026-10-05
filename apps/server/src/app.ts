@@ -4,17 +4,23 @@ import fastifyCookie from '@fastify/cookie'
 import fastifyRateLimit from '@fastify/rate-limit'
 import fastifyStatic from '@fastify/static'
 import { registerAuth, type AuthConfig } from './auth.ts'
+import type { ServerStatus } from './glances.ts'
+import { registerPushRoutes, type Push } from './push.ts'
 
 export type AppOptions = {
   db: DatabaseSync
   auth: AuthConfig
   sessionSecret: string
+  /** Métricas del host (Glances). Sin ella, /api/status responde 503. */
+  getStatus?: () => Promise<ServerStatus>
+  /** Notificaciones push. Sin claves VAPID, /api/push/* responde 503. */
+  push?: Push
   /** Carpeta con la PWA compilada; sin ella solo se sirve la /api (tests). */
   webDist?: string
   logger?: boolean
 }
 
-export async function buildApp({ db, auth, sessionSecret, webDist, logger = false }: AppOptions) {
+export async function buildApp({ db, auth, sessionSecret, getStatus, push, webDist, logger = false }: AppOptions) {
   const app = Fastify({ logger })
 
   await app.register(fastifyCookie, { secret: sessionSecret })
@@ -22,6 +28,19 @@ export async function buildApp({ db, auth, sessionSecret, webDist, logger = fals
   registerAuth(app, db, auth)
 
   app.get('/api/health', async () => ({ ok: true, time: new Date().toISOString() }))
+
+  app.get('/api/status', async (req, reply) => {
+    if (!getStatus) return reply.code(503).send({ error: 'monitor_unavailable' })
+    try {
+      return await getStatus()
+    } catch (error) {
+      req.log.warn({ error }, 'glances unavailable')
+      return reply.code(503).send({ error: 'monitor_unavailable' })
+    }
+  })
+
+  if (push) registerPushRoutes(app, push)
+  else app.all('/api/push/*', async (_req, reply) => reply.code(503).send({ error: 'push_disabled' }))
 
   if (webDist) {
     // Sirve la PWA compilada. El SW, el HTML y el manifest se revalidan siempre para que

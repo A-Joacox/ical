@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNow } from '../../ui/useNow'
 import { adjustRest, clearRest } from './data'
 import { beep } from './device'
+import { cancelRestPush } from './restPush'
 import { formatDuration } from './stats'
 import type { Workout } from './types'
 
@@ -14,6 +15,13 @@ export function RestTimerBar({ workout }: { workout: Workout }) {
   const now = useNow(250, running)
   const remaining = (workout.restEndsAt ?? 0) - now
   const finished = running && remaining <= 0
+  const nearEnd = running && remaining < 2500
+
+  // Con la app a la vista basta el pitido: se cancela la notificación push justo antes de que
+  // salga. Si el iPhone está bloqueado, la app está pausada, esto no se ejecuta y la push llega.
+  useEffect(() => {
+    if (nearEnd && document.visibilityState === 'visible') cancelRestPush()
+  }, [nearEnd])
 
   // Se ejecuta solo al pasar a terminado. Suena únicamente si la app estaba abierta en ese
   // momento (no al volver mucho después).

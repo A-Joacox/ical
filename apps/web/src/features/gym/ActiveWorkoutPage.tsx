@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Block, Button, Link, Navbar, NavbarBackLink, Page } from 'konsta/react'
+import { Block, Button, Link, NavbarBackLink, Page } from 'konsta/react'
 import { Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, useNavigate } from 'react-router'
@@ -13,6 +13,7 @@ import { ExercisePicker } from './ExercisePicker'
 import { useActiveWorkout, useExerciseMap, useWorkoutSets } from './hooks'
 import { RestTimerBar } from './RestTimerBar'
 import { formatDuration } from './stats'
+import { Navbar } from '../../ui/Navbar'
 
 // Sesión en curso a pantalla completa (sin tab bar). Mantiene la pantalla encendida.
 export function ActiveWorkoutPage() {

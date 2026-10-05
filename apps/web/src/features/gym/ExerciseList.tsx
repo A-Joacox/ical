@@ -8,9 +8,6 @@ import { MUSCLES, type Exercise } from './types'
 // Sin tildes y en minúsculas, para que "press banca" encuentre "Press de banca".
 const normalize = (text: string) => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
-/** Fondo del Navbar con buscador: más opaco que el de Konsta para que la lista no se vea detrás al hacer scroll. */
-export const SEARCH_NAVBAR_COLORS = { bgIos: 'bg-gradient-to-b from-black from-70% to-transparent' }
-
 /** Buscador de ejercicios. Va en el `subnavbar` del Navbar para que respete la zona segura. */
 export function ExerciseSearchbar({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   const { t } = useTranslation()

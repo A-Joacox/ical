@@ -1,4 +1,4 @@
-import { Block, BlockTitle, Button, List, ListButton, ListItem, Navbar } from 'konsta/react'
+import { Block, BlockTitle, Button, List, ListButton, ListItem } from 'konsta/react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { BookOpen, Play, Plus, Timer } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -10,6 +10,7 @@ import { useNow } from '../../ui/useNow'
 import { createRoutine, startWorkout } from './data'
 import { useActiveWorkout } from './hooks'
 import { formatDuration } from './stats'
+import { Navbar } from '../../ui/Navbar'
 
 export function GymPage() {
   const { t, i18n } = useTranslation()

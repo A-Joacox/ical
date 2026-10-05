@@ -19,6 +19,36 @@ registerRoute(
   new NavigationRoute(createHandlerBoundToURL('index.html'), { denylist: [/^\/api\//, /^\/webhook/] }),
 )
 
+// Notificaciones push del server (fin del descanso, alertas). iOS exige mostrar una
+// notificación por cada push recibida.
+type PushMessage = { title?: string; body?: string; tag?: string; url?: string }
+
+self.addEventListener('push', (event) => {
+  const message: PushMessage = event.data?.json() ?? {}
+  event.waitUntil(
+    self.registration.showNotification(message.title ?? 'Self Grow', {
+      body: message.body,
+      tag: message.tag,
+      icon: '/pwa-192x192.png',
+      data: { url: message.url ?? '/' },
+    }),
+  )
+})
+
+// Al tocar la notificación: abre la app (o la trae al frente) en la pantalla relacionada.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const url: string = event.notification.data?.url ?? '/'
+  event.waitUntil(
+    (async () => {
+      const [client] = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+      if (!client) return self.clients.openWindow(url)
+      await client.focus()
+      return client.navigate(url)
+    })(),
+  )
+})
+
 // Fotos de los ejercicios (free-exercise-db): se guardan la primera vez que se ven para
 // tenerlas en el gym sin conexión.
 registerRoute(

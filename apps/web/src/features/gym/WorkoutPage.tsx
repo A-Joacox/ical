@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Block, BlockTitle, List, ListButton, ListItem, Navbar, NavbarBackLink } from 'konsta/react'
+import { Block, BlockTitle, List, ListButton, ListItem, NavbarBackLink } from 'konsta/react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Trophy } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -12,6 +12,7 @@ import { deleteWorkout, getWorkoutRecords } from './data'
 import { useExerciseMap, useExerciseName, useWorkoutSets } from './hooks'
 import { displayWeight, formatDuration, fromKg, volumeKg } from './stats'
 import type { WorkoutSet } from './types'
+import { Navbar } from '../../ui/Navbar'
 
 // Resumen de un entrenamiento terminado.
 export function WorkoutPage() {

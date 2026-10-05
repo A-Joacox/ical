@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Link, Navbar, Page, Popup } from 'konsta/react'
+import { Link, Page, Popup } from 'konsta/react'
 import { useTranslation } from 'react-i18next'
 import { createExercise } from './data'
-import { ExerciseList, ExerciseSearchbar, SEARCH_NAVBAR_COLORS } from './ExerciseList'
+import { ExerciseList, ExerciseSearchbar } from './ExerciseList'
+import { Navbar } from '../../ui/Navbar'
 
 type Props = { opened: boolean; onClose: () => void; onPick: (exerciseId: string) => void }
 
@@ -27,7 +28,6 @@ export function ExercisePicker({ opened, onClose, onPick }: Props) {
           title={t('gym.addExercise')}
           right={<Link onClick={close}>{t('gym.close')}</Link>}
           subnavbar={<ExerciseSearchbar value={query} onChange={setQuery} />}
-          colors={SEARCH_NAVBAR_COLORS}
         />
         {opened && (
           <ExerciseList

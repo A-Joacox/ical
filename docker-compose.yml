@@ -5,8 +5,31 @@ services:
     env_file: apps/server/.env
     environment:
       DATA_DIR: /data
+      GLANCES_URL: http://glances:61208
     volumes:
       - ./data:/data
     # Solo escucha en localhost: `tailscale funnel` lo publica con HTTPS.
     ports:
       - "127.0.0.1:3000:3000"
+    depends_on:
+      - glances
+
+  # Métricas del host (CPU, RAM, discos, temperaturas, batería, contenedores). Solo la API REST,
+  # sin puertos publicados: únicamente la app la consulta por la red interna de Docker.
+  glances:
+    image: nicolargo/glances:latest-full
+    restart: unless-stopped
+    pid: host
+    environment:
+      GLANCES_OPT: "-w --disable-webui"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/os-release:/etc/os-release:ro
+    # Opcional, para la temperatura de la GPU NVIDIA (requiere nvidia-container-toolkit en el host):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
