@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { db } from '../../db/db'
 import { useGoals } from '../../db/settings'
+import { ActiveWorkoutCard } from '../gym/ActiveWorkoutCard'
 import { useActiveWorkout } from '../gym/hooks'
 import { IconBadge } from '../../ui/IconBadge'
 import { MacroBars } from '../../ui/MacroBars'
@@ -54,6 +55,8 @@ export function TodayPage() {
       />
 
       <p className="-mt-2 px-4 text-[15px] font-medium text-label-2 first-letter:uppercase">{date}</p>
+
+      {activeWorkout && <ActiveWorkoutCard workout={activeWorkout} />}
 
       <Block strong inset className="flex items-center gap-5">
         <ProgressRing progress={EATEN.kcal / goals.kcal} colorClassName="text-food">

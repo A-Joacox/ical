@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { bestSet, displayWeight, estimate1RM, formatDuration, fromKg, toKg, volumeKg } from './stats'
+import { bestSet, displayWeight, estimate1RM, formatDuration, fromKg, nextSet, toKg, volumeKg } from './stats'
 
 describe('unidades', () => {
   test('kg ↔ lb ida y vuelta conserva lo que escribió el usuario', () => {
@@ -38,4 +38,20 @@ test('formatDuration', () => {
   expect(formatDuration(90_000)).toBe('1:30')
   expect(formatDuration(3_725_000)).toBe('1:02:05')
   expect(formatDuration(-5)).toBe('0:00')
+})
+
+describe('serie que toca', () => {
+  const set = (exerciseOrder: number, completedAt?: number) => ({ exerciseOrder, completedAt })
+
+  test('sigue con el ejercicio de la última serie marcada, aunque se haya saltado otro', () => {
+    const sets = [set(0, 1), set(0), set(1), set(2, 2), set(2)]
+    expect(nextSet(sets)).toBe(sets[4])
+  })
+
+  test('si ese ejercicio está terminado, la primera sin marcar', () => {
+    const sets = [set(0), set(1, 1), set(1, 2)]
+    expect(nextSet(sets)).toBe(sets[0])
+    expect(nextSet([set(0), set(1)])).toEqual(set(0))
+    expect(nextSet([set(0, 1)])).toBeUndefined()
+  })
 })

@@ -77,8 +77,13 @@ export function RoutinePage() {
             return (
               <div key={item.id} className="space-y-2 py-3 first:pt-0 last:pb-0">
                 <div className="flex items-center gap-3">
-                  <ExerciseThumb exercise={exercise} />
-                  <span className="min-w-0 flex-1 truncate text-[17px] font-medium">{name(exercise)}</span>
+                  <button
+                    className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                    onClick={() => navigate(`/gym/exercises/${item.exerciseId}`)}
+                  >
+                    <ExerciseThumb exercise={exercise} />
+                    <span className="truncate text-[17px] font-medium">{name(exercise)}</span>
+                  </button>
                   <Link iconOnly aria-label={t('gym.removeExercise')} onClick={() => removeRoutineExercise(item.id)}>
                     <X className="h-5 w-5" />
                   </Link>

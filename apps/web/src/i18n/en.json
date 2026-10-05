@@ -11,6 +11,8 @@
     "noWorkout": "No workouts today",
     "gymInProgress": "In progress",
     "gymDone": "Done today",
+    "setOf": "Set {{set}} of {{total}}",
+    "allSetsDone": "All sets done",
     "noEvents": "No upcoming events",
     "addFood": "Food",
     "startGym": "Start workout"

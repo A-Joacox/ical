@@ -11,6 +11,8 @@
     "noWorkout": "Sin entrenamientos hoy",
     "gymInProgress": "En curso",
     "gymDone": "Completado hoy",
+    "setOf": "Serie {{set}} de {{total}}",
+    "allSetsDone": "Todas las series hechas",
     "noEvents": "Sin eventos próximos",
     "addFood": "Comida",
     "startGym": "Iniciar gym"

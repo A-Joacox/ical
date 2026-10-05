@@ -39,3 +39,13 @@ export function formatDuration(ms: number) {
   const s = String(total % 60).padStart(2, '0')
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`
 }
+
+/**
+ * Serie que toca (con las series en orden): la siguiente sin marcar del ejercicio de la última serie
+ * marcada o, si ese ejercicio ya está terminado, la primera sin marcar.
+ */
+export function nextSet<T extends { exerciseOrder: number; completedAt?: number }>(sets: T[]): T | undefined {
+  const pending = sets.filter((s) => !s.completedAt)
+  const last = sets.reduce<T | undefined>((a, b) => ((b.completedAt ?? 0) > (a?.completedAt ?? 0) ? b : a), undefined)
+  return pending.find((s) => s.exerciseOrder === last?.exerciseOrder) ?? pending[0]
+}
