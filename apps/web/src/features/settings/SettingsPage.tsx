@@ -1,0 +1,73 @@
+import { Block, BlockTitle, List, ListItem, Navbar, NavbarBackLink, Segmented, SegmentedButton } from 'konsta/react'
+import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router'
+import { saveGoals, useGoals, type Goals } from '../../db/settings'
+import { LANGUAGES } from '../../i18n'
+import { TabPage } from '../../ui/TabPage'
+import { AccountSection } from './AccountSection'
+
+const LANGUAGE_NAMES = { es: 'Español', en: 'English' } as const
+
+const GOAL_FIELDS = [
+  { key: 'kcal', label: 'settings.kcal' },
+  { key: 'protein', label: 'settings.proteinG' },
+  { key: 'carbs', label: 'settings.carbsG' },
+  { key: 'fat', label: 'settings.fatG' },
+] as const
+
+export function SettingsPage() {
+  const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
+  const goals = useGoals()
+
+  // Guarda al salir del campo; un valor inválido vuelve al anterior.
+  const onGoalBlur = (key: keyof Goals, input: HTMLInputElement) => {
+    const value = Math.round(Number(input.value))
+    if (value > 0) saveGoals({ ...goals, [key]: value })
+    else input.value = String(goals[key])
+  }
+
+  return (
+    <TabPage>
+      <Navbar title={t('settings.title')} left={<NavbarBackLink text={t('tabs.today')} onClick={() => navigate('/')} />} />
+
+      <BlockTitle>{t('settings.language')}</BlockTitle>
+      <Block>
+        <Segmented strong colors={{ strongBgIos: 'bg-[#767680]/25', strongHighlightBgIos: 'bg-[#636366]' }}>
+          {LANGUAGES.map((lng) => (
+            <SegmentedButton
+              key={lng}
+              active={i18n.resolvedLanguage === lng}
+              className="text-white"
+              onClick={() => i18n.changeLanguage(lng)}
+            >
+              {LANGUAGE_NAMES[lng]}
+            </SegmentedButton>
+          ))}
+        </Segmented>
+      </Block>
+
+      <BlockTitle>{t('settings.goals')}</BlockTitle>
+      <List strong inset dividers>
+        {GOAL_FIELDS.map(({ key, label }) => (
+          <ListItem
+            key={`${key}-${goals[key]}`}
+            label
+            title={t(label)}
+            after={
+              <input
+                type="number"
+                inputMode="numeric"
+                defaultValue={goals[key]}
+                onBlur={(event) => onGoalBlur(key, event.target)}
+                className="w-24 bg-transparent text-right text-[17px] tabular-nums text-label-2 outline-none"
+              />
+            }
+          />
+        ))}
+      </List>
+
+      <AccountSection />
+    </TabPage>
+  )
+}

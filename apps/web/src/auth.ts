@@ -20,3 +20,5 @@ export async function loginWithPasskey() {
   const optionsJSON = await api<PublicKeyCredentialRequestOptionsJSON>('/auth/login/options', {})
   await api('/auth/login/verify', await startAuthentication({ optionsJSON }))
 }
+
+export const logout = () => api('/auth/logout', {})

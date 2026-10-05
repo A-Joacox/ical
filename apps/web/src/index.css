@@ -1,94 +1,33 @@
-:root {
-  color-scheme: dark;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
-  background: #000;
-  color: #fff;
+@import 'tailwindcss';
+@import 'konsta/react/theme.css';
+
+/* Paleta de sistema de iOS en modo oscuro. */
+@theme {
+  --color-brand-primary: #0a84ff;
+
+  --color-food: #30d158;
+  --color-gym: #ff9f0a;
+  --color-agenda: #0a84ff;
+  --color-server: #bf5af2;
+  --color-danger: #ff453a;
+  --color-warning: #ffd60a;
+
+  --color-protein: #ff375f;
+  --color-carbs: #ffd60a;
+  --color-fat: #64d2ff;
+
+  --color-surface: #1c1c1e;
+  --color-surface-2: #2c2c2e;
+  --color-separator: #38383a;
+  --color-label-2: #8e8e93;
+}
+
+html,
+body,
+#root {
+  height: 100%;
 }
 
 body {
-  margin: 0;
-}
-
-.hello {
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
-  box-sizing: border-box;
-}
-
-.hello img {
-  border-radius: 22px;
-}
-
-.hello h1 {
-  margin: 0;
-  font-size: 34px;
-  font-weight: 700;
-}
-
-.status {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #8e8e93;
-  font-size: 15px;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.dot.green {
-  background: #30d158;
-}
-
-.dot.red {
-  background: #ff453a;
-}
-
-.setup {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-  max-width: 320px;
-}
-
-.input {
-  font: inherit;
-  font-size: 17px;
-  padding: 12px 14px;
-  border: none;
-  border-radius: 12px;
-  background: #1c1c1e;
-  color: #fff;
-}
-
-.button {
-  font: inherit;
-  font-size: 17px;
-  font-weight: 600;
-  min-height: 50px;
-  padding: 0 20px;
-  border: none;
-  border-radius: 14px;
-  background: #0a84ff;
-  color: #fff;
-}
-
-.button:disabled {
-  opacity: 0.4;
-}
-
-.error {
-  margin: 0;
-  color: #ff453a;
-  font-size: 15px;
+  background: #000;
 }

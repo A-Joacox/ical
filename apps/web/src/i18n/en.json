@@ -1,0 +1,54 @@
+{
+  "tabs": {
+    "today": "Today",
+    "food": "Food",
+    "gym": "Gym",
+    "agenda": "Agenda",
+    "server": "Server"
+  },
+  "today": {
+    "kcalLeft": "kcal left",
+    "ofGoal": "of {{goal}} kcal",
+    "noWorkout": "No workouts today",
+    "noEvents": "No upcoming events",
+    "addFood": "Food",
+    "startGym": "Start workout"
+  },
+  "server": {
+    "online": "Online",
+    "offline": "Offline",
+    "checking": "Checking…"
+  },
+  "macros": {
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat"
+  },
+  "placeholder": {
+    "soon": "Coming soon",
+    "food": "Log your meals with a photo, barcode or search.",
+    "gym": "Routines, sets, records and rest timer.",
+    "agenda": "Your Google Calendar events.",
+    "server": "CPU, memory, temperatures and containers of your home server."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "goals": "Daily goals",
+    "kcal": "Calories (kcal)",
+    "proteinG": "Protein (g)",
+    "carbsG": "Carbs (g)",
+    "fatG": "Fat (g)",
+    "account": "Account",
+    "session": "Session",
+    "signedIn": "Signed in",
+    "signedOut": "Signed out",
+    "setupCode": "Setup code",
+    "registerDevice": "Register this iPhone",
+    "signIn": "Sign in with Face ID",
+    "addDevice": "Add another device",
+    "signOut": "Sign out",
+    "accountFooter": "Signing in is only needed to sync with your server. The app works offline.",
+    "error": "Something went wrong. Please try again."
+  }
+}

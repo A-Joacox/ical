@@ -1,0 +1,54 @@
+{
+  "tabs": {
+    "today": "Hoy",
+    "food": "Comida",
+    "gym": "Gym",
+    "agenda": "Agenda",
+    "server": "Server"
+  },
+  "today": {
+    "kcalLeft": "kcal restantes",
+    "ofGoal": "de {{goal}} kcal",
+    "noWorkout": "Sin entrenamientos hoy",
+    "noEvents": "Sin eventos próximos",
+    "addFood": "Comida",
+    "startGym": "Iniciar gym"
+  },
+  "server": {
+    "online": "Online",
+    "offline": "Sin conexión",
+    "checking": "Comprobando…"
+  },
+  "macros": {
+    "protein": "Proteína",
+    "carbs": "Carbohidratos",
+    "fat": "Grasas"
+  },
+  "placeholder": {
+    "soon": "Próximamente",
+    "food": "Registra tus comidas con foto, código de barras o búsqueda.",
+    "gym": "Rutinas, series, récords y temporizador de descanso.",
+    "agenda": "Tus eventos de Google Calendar.",
+    "server": "CPU, memoria, temperaturas y contenedores de tu home-server."
+  },
+  "settings": {
+    "title": "Ajustes",
+    "language": "Idioma",
+    "goals": "Objetivos diarios",
+    "kcal": "Calorías (kcal)",
+    "proteinG": "Proteína (g)",
+    "carbsG": "Carbohidratos (g)",
+    "fatG": "Grasas (g)",
+    "account": "Cuenta",
+    "session": "Sesión",
+    "signedIn": "Iniciada",
+    "signedOut": "No iniciada",
+    "setupCode": "Código de configuración",
+    "registerDevice": "Registrar este iPhone",
+    "signIn": "Entrar con Face ID",
+    "addDevice": "Añadir otro dispositivo",
+    "signOut": "Cerrar sesión",
+    "accountFooter": "La sesión solo hace falta para sincronizar con tu server. La app funciona sin conexión.",
+    "error": "No se pudo completar. Inténtalo de nuevo."
+  }
+}
