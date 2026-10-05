@@ -40,7 +40,7 @@ export function GymPage() {
     <TabPage>
       <Navbar title={t('tabs.gym')} large transparent centerTitle />
 
-      {active ? (
+      {active && (
         <List strong inset>
           <ListItem
             link
@@ -51,13 +51,6 @@ export function GymPage() {
             onClick={() => navigate('/gym/session')}
           />
         </List>
-      ) : (
-        <Block>
-          <Button large rounded onClick={startEmpty}>
-            <Plus className="mr-1 h-5 w-5" />
-            {t('gym.startEmpty')}
-          </Button>
-        </Block>
       )}
 
       <BlockTitle>{t('gym.routines')}</BlockTitle>
@@ -74,6 +67,16 @@ export function GymPage() {
         ))}
         <ListButton onClick={newRoutine}>{t('gym.newRoutine')}</ListButton>
       </List>
+
+      {/* Lo habitual es entrar por una rutina; el entrenamiento vacío queda como opción secundaria. */}
+      {!active && (
+        <Block>
+          <Button large rounded tonal onClick={startEmpty}>
+            <Plus className="mr-1 h-5 w-5" />
+            {t('gym.startEmpty')}
+          </Button>
+        </Block>
+      )}
 
       <List strong inset>
         <ListItem
