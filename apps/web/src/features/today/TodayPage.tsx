@@ -1,8 +1,11 @@
 import { Block, Button, Link, List, ListItem, Navbar } from 'konsta/react'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { CalendarDays, Dumbbell, Plus, Server, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
+import { db } from '../../db/db'
 import { useGoals } from '../../db/settings'
+import { useActiveWorkout } from '../gym/hooks'
 import { IconBadge } from '../../ui/IconBadge'
 import { MacroBars } from '../../ui/MacroBars'
 import { ProgressRing } from '../../ui/ProgressRing'
@@ -19,8 +22,17 @@ export function TodayPage() {
   const navigate = useNavigate()
   const goals = useGoals()
   const health = useServerHealth()
+  const activeWorkout = useActiveWorkout()
+  const workoutsToday = useLiveQuery(() =>
+    db.workouts
+      .where('startedAt')
+      .aboveOrEqual(new Date().setHours(0, 0, 0, 0))
+      .filter((w) => !!w.endedAt && !w.deletedAt)
+      .count(),
+  )
   const date = new Intl.DateTimeFormat(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())
   const kcalLeft = Math.max(goals.kcal - EATEN.kcal, 0)
+  const gymStatus = activeWorkout ? t('today.gymInProgress') : workoutsToday ? t('today.gymDone') : t('today.noWorkout')
 
   return (
     <TabPage>
@@ -50,9 +62,9 @@ export function TodayPage() {
         <ListItem
           link
           title={t('tabs.gym')}
-          after={t('today.noWorkout')}
+          after={gymStatus}
           media={<IconBadge Icon={Dumbbell} tone="gym" />}
-          onClick={() => navigate('/gym')}
+          onClick={() => navigate(activeWorkout ? '/gym/session' : '/gym')}
         />
         <ListItem
           link
@@ -80,7 +92,7 @@ export function TodayPage() {
           <Plus className="mr-1 h-5 w-5" />
           {t('today.addFood')}
         </Button>
-        <Button large rounded onClick={() => navigate('/gym')}>
+        <Button large rounded onClick={() => navigate(activeWorkout ? '/gym/session' : '/gym')}>
           <Dumbbell className="mr-1.5 h-5 w-5" />
           {t('today.startGym')}
         </Button>

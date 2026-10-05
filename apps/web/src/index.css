@@ -20,6 +20,22 @@
   --color-surface-2: #2c2c2e;
   --color-separator: #38383a;
   --color-label-2: #8e8e93;
+
+  /* Alterna las dos fotos (inicio/fin) de un ejercicio como si fuera un GIF. */
+  --animate-exercise-frame: exercise-frame 2.4s ease-in-out infinite;
+  @keyframes exercise-frame {
+    0%,
+    40% {
+      opacity: 0;
+    }
+    50%,
+    90% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
 }
 
 html,

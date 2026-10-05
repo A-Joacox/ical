@@ -1,12 +1,15 @@
 import { Block, BlockTitle, List, ListItem, Navbar, NavbarBackLink, Segmented, SegmentedButton } from 'konsta/react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
-import { saveGoals, useGoals, type Goals } from '../../db/settings'
+import { saveGoals, saveWeightUnit, useGoals, useWeightUnit, type Goals } from '../../db/settings'
 import { LANGUAGES } from '../../i18n'
 import { TabPage } from '../../ui/TabPage'
 import { AccountSection } from './AccountSection'
 
 const LANGUAGE_NAMES = { es: 'Español', en: 'English' } as const
+const WEIGHT_UNITS = ['kg', 'lb'] as const
+// Selector segmentado con los grises de iOS en modo oscuro.
+const SEGMENTED_COLORS = { strongBgIos: 'bg-[#767680]/25', strongHighlightBgIos: 'bg-[#636366]' }
 
 const GOAL_FIELDS = [
   { key: 'kcal', label: 'settings.kcal' },
@@ -19,6 +22,7 @@ export function SettingsPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const goals = useGoals()
+  const unit = useWeightUnit()
 
   // Guarda al salir del campo; un valor inválido vuelve al anterior.
   const onGoalBlur = (key: keyof Goals, input: HTMLInputElement) => {
@@ -33,7 +37,7 @@ export function SettingsPage() {
 
       <BlockTitle>{t('settings.language')}</BlockTitle>
       <Block>
-        <Segmented strong colors={{ strongBgIos: 'bg-[#767680]/25', strongHighlightBgIos: 'bg-[#636366]' }}>
+        <Segmented strong colors={SEGMENTED_COLORS}>
           {LANGUAGES.map((lng) => (
             <SegmentedButton
               key={lng}
@@ -42,6 +46,17 @@ export function SettingsPage() {
               onClick={() => i18n.changeLanguage(lng)}
             >
               {LANGUAGE_NAMES[lng]}
+            </SegmentedButton>
+          ))}
+        </Segmented>
+      </Block>
+
+      <BlockTitle>{t('settings.weightUnit')}</BlockTitle>
+      <Block>
+        <Segmented strong colors={SEGMENTED_COLORS}>
+          {WEIGHT_UNITS.map((value) => (
+            <SegmentedButton key={value} active={unit === value} className="text-white" onClick={() => saveWeightUnit(value)}>
+              {value}
             </SegmentedButton>
           ))}
         </Segmented>

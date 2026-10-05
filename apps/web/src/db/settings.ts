@@ -1,4 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
+import type { WeightUnit } from '../features/gym/types'
 import { db } from './db'
 
 export type Goals = { kcal: number; protein: number; carbs: number; fat: number }
@@ -12,4 +13,13 @@ export function useGoals(): Goals {
 
 export function saveGoals(goals: Goals) {
   return db.settings.put({ key: 'goals', value: goals, updatedAt: Date.now() })
+}
+
+export function useWeightUnit(): WeightUnit {
+  const row = useLiveQuery(() => db.settings.get('weightUnit'))
+  return row?.value === 'lb' ? 'lb' : 'kg'
+}
+
+export function saveWeightUnit(unit: WeightUnit) {
+  return db.settings.put({ key: 'weightUnit', value: unit, updatedAt: Date.now() })
 }
