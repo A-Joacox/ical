@@ -17,19 +17,23 @@ services:
   # Métricas del host (CPU, RAM, discos, temperaturas, batería, contenedores). Solo la API REST,
   # sin puertos publicados: únicamente la app la consulta por la red interna de Docker.
   glances:
-    image: nicolargo/glances:latest-full
+    # Variante Ubuntu (glibc): la librería NVML que inyecta el toolkit de NVIDIA no carga en Alpine.
+    image: nicolargo/glances:ubuntu-latest-full
     restart: unless-stopped
     pid: host
+    # Comparte el hostname del host (si no, muestra el ID del contenedor).
+    uts: host
     environment:
       GLANCES_OPT: "-w --disable-webui"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /etc/os-release:/etc/os-release:ro
-    # Opcional, para la temperatura de la GPU NVIDIA (requiere nvidia-container-toolkit en el host):
+    # GPU NVIDIA (temperatura y uso): requiere que `docker run --rm --gpus all ubuntu nvidia-smi`
+    # funcione en el host. Pendiente: hoy falla con el error de nvidia-cuda-mps-control.
     # deploy:
     #   resources:
     #     reservations:
     #       devices:
     #         - driver: nvidia
     #           count: 1
-    #           capabilities: [gpu]
+    #           capabilities: [gpu, utility]

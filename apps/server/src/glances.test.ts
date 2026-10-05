@@ -10,9 +10,11 @@ test('resume las respuestas de Glances', () => {
     mem: { percent: 61, used: 5e9, total: 8e9 },
     memswap: { percent: 3 },
     fs: [
-      { device_name: '/dev/nvme0n1p2', mnt_point: '/', used: 50e9, size: 250e9, percent: 20 },
-      // Bind mount del mismo disco dentro del contenedor: no debe repetirse.
+      // Dentro del contenedor el disco raíz del host aparece vía archivos montados por Docker.
+      { device_name: '/dev/nvme0n1p2', mnt_point: '/etc/hostname', used: 50e9, size: 250e9, percent: 20 },
       { device_name: '/dev/nvme0n1p2', mnt_point: '/etc/hosts', used: 50e9, size: 250e9, percent: 20 },
+      // Montaje de un archivo pequeño de solo lectura: no es un disco.
+      { device_name: '/dev/loop3', mnt_point: '/usr/lib/os-release', used: 70e6, size: 70e6, percent: 100 },
       { device_name: '/dev/sda1', mnt_point: '/media/data', used: 900e9, size: 1000e9, percent: 90 },
     ],
     sensors: [

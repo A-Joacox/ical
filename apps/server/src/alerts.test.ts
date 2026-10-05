@@ -48,6 +48,15 @@ describe('evaluateAlerts', () => {
     expect(evaluateAlerts(stopped, next.state, 2000).alerts).toEqual([])
   })
 
+  test('"healthy" cuenta como corriendo; "unhealthy" avisa', () => {
+    const healthy = status({ containers: [{ name: 'pihole', status: 'healthy', cpuPercent: 0, memUsage: 0 }] })
+    const asHealthy = evaluateAlerts(healthy, { lastSent: {}, containers: { pihole: 'running' } }, 1000)
+    expect(asHealthy.alerts).toEqual([])
+
+    const unhealthy = status({ containers: [{ name: 'pihole', status: 'unhealthy', cpuPercent: 0, memUsage: 0 }] })
+    expect(evaluateAlerts(unhealthy, asHealthy.state, 2000).alerts.map((a) => a.key)).toEqual(['container:pihole'])
+  })
+
   test('mensajes en el idioma de la suscripción', () => {
     const alert = { key: 'power', kind: 'power', percent: 70 } as const
     expect(alertMessage(alert, 'es').title).toBe('El server está usando la batería')

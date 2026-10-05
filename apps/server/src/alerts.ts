@@ -1,4 +1,4 @@
-import type { ServerStatus } from './glances.ts'
+import { isContainerUp, type ServerStatus } from './glances.ts'
 import type { Lang, PushMessage } from './push.ts'
 
 export const DISK_ALERT_PERCENT = 90
@@ -36,9 +36,10 @@ export function evaluateAlerts(status: ServerStatus, state: AlertState, now: num
     candidates.push({ key: 'temp', kind: 'temp', label: hottest.label, value: hottest.value })
   }
 
-  // Solo avisa cuando un contenedor que estaba corriendo deja de hacerlo.
+  // Solo avisa cuando un contenedor que estaba corriendo deja de hacerlo (o queda "unhealthy").
   for (const container of status.containers) {
-    if (state.containers[container.name] === 'running' && container.status !== 'running') {
+    const previous = state.containers[container.name]
+    if (previous !== undefined && isContainerUp(previous) && !isContainerUp(container.status)) {
       candidates.push({ key: `container:${container.name}`, kind: 'container', name: container.name, status: container.status })
     }
   }

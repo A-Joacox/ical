@@ -12,6 +12,10 @@ const level = (value: number, warn: number, danger: number) =>
   value >= danger ? 'text-danger' : value >= warn ? 'text-warning' : 'text-server'
 const barLevel = (percent: number) => (percent >= 90 ? 'bg-danger' : percent >= 75 ? 'bg-warning' : 'bg-server')
 
+// Con healthcheck, Docker informa "healthy"/"starting" en vez de "running".
+const containerDot = (status: string) =>
+  ['running', 'healthy'].includes(status) ? 'bg-food' : ['exited', 'dead', 'unhealthy'].includes(status) ? 'bg-danger' : 'bg-warning'
+
 // Glances da el uptime en inglés ("3 days, 4:05:06").
 const translateUptime = (uptime: string, lang: string) =>
   lang.startsWith('es') ? uptime.replace(/\bdays?\b/, (word) => (word === 'day' ? 'día' : 'días')) : uptime
@@ -133,11 +137,7 @@ export function ServerPage() {
                   key={container.name}
                   title={container.name}
                   subtitle={container.status}
-                  media={
-                    <span
-                      className={`block h-2.5 w-2.5 rounded-full ${container.status === 'running' ? 'bg-food' : container.status === 'exited' ? 'bg-danger' : 'bg-warning'}`}
-                    />
-                  }
+                  media={<span className={`block h-2.5 w-2.5 rounded-full ${containerDot(container.status)}`} />}
                   after={
                     <span className="tabular-nums">
                       {container.cpuPercent.toFixed(1)}% · {formatBytes(container.memUsage, lang)}

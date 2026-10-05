@@ -44,8 +44,9 @@ En local las passkeys usan `localhost`. Para registrar una, crea `apps/server/.e
    docker compose run --rm --no-deps app node -e "console.log(require('web-push').generateVAPIDKeys())"
    docker compose up -d
    ```
-   Opcional: para ver la temperatura de la GPU NVIDIA, instala `nvidia-container-toolkit` y
-   descomenta el bloque `deploy` del servicio `glances` en `docker-compose.yml`.
+   Para la temperatura de la GPU NVIDIA: con el driver y `nvidia-container-toolkit` instalados y
+   `docker run --rm --gpus all ubuntu nvidia-smi` funcionando, descomenta el bloque `deploy` del
+   servicio `glances` en `docker-compose.yml`.
 5. **Publicarla con Funnel** en la raíz del 443 (la ruta `/webhook` de n8n sigue en el mismo puerto):
    ```bash
    sudo tailscale funnel --bg 3000

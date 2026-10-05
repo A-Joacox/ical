@@ -18,6 +18,14 @@ export type ServerStatus = {
 
 type Raw = Record<string, any>
 
+// Docker monta estos archivos dentro del contenedor de Glances; viven en el disco raíz del host.
+const CONTAINER_BIND_FILES = new Set(['/etc/hostname', '/etc/hosts', '/etc/resolv.conf'])
+// Por debajo de esto son montajes de archivos sueltos o sistemas de solo lectura (p. ej. os-release).
+const MIN_DISK_BYTES = 1e9
+
+/** Un contenedor con healthcheck informa "healthy"/"starting" en vez de "running". */
+export const isContainerUp = (status: string) => ['running', 'healthy', 'starting'].includes(status)
+
 /** Convierte las respuestas crudas de Glances en el resumen que muestra la app. */
 export function summarizeGlances(raw: {
   system: Raw
@@ -34,9 +42,14 @@ export function summarizeGlances(raw: {
   // Dentro del contenedor los bind mounts repiten el disco del host: uno por dispositivo.
   const disks = new Map<string, ServerStatus['disks'][number]>()
   for (const fs of raw.fs) {
-    if (!disks.has(fs.device_name)) {
-      disks.set(fs.device_name, { mount: fs.mnt_point, device: fs.device_name, used: fs.used, size: fs.size, percent: fs.percent })
-    }
+    if (fs.size < MIN_DISK_BYTES || disks.has(fs.device_name)) continue
+    disks.set(fs.device_name, {
+      mount: CONTAINER_BIND_FILES.has(fs.mnt_point) ? '/' : fs.mnt_point,
+      device: fs.device_name,
+      used: fs.used,
+      size: fs.size,
+      percent: fs.percent,
+    })
   }
   const battery = raw.sensors.find((s) => s.type === 'battery')
 
