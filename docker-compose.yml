@@ -1,0 +1,7 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    # Solo escucha en localhost: `tailscale serve` lo publica con HTTPS dentro de tu tailnet.
+    ports:
+      - "127.0.0.1:3000:3000"
