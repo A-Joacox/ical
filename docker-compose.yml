@@ -2,6 +2,11 @@ services:
   app:
     build: .
     restart: unless-stopped
-    # Solo escucha en localhost: `tailscale serve` lo publica con HTTPS dentro de tu tailnet.
+    env_file: apps/server/.env
+    environment:
+      DATA_DIR: /data
+    volumes:
+      - ./data:/data
+    # Solo escucha en localhost: `tailscale funnel` lo publica con HTTPS.
     ports:
       - "127.0.0.1:3000:3000"

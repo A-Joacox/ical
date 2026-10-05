@@ -1,29 +1,76 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { getAuthStatus, loginWithPasskey, registerPasskey, type AuthStatus } from './auth'
 
-type Health = { ok: boolean; time: string }
-
-// Pantalla provisional de la fase 0: confirma que la PWA carga y si el server responde.
+// Pantalla provisional: estado del server y login con passkey. En la fase 1 esto pasa a Ajustes.
 export function App() {
-  const [health, setHealth] = useState<Health | 'offline' | null>(null)
+  const [status, setStatus] = useState<AuthStatus | 'offline' | null>(null)
+  const [setupToken, setSetupToken] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  const refresh = () =>
+    getAuthStatus()
+      .then(setStatus)
+      .catch(() => setStatus('offline'))
 
   useEffect(() => {
-    fetch('/api/health')
-      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-      .then(setHealth)
-      .catch(() => setHealth('offline'))
+    refresh()
   }, [])
+
+  const run = (action: () => Promise<void>) => {
+    setError(null)
+    action()
+      .then(refresh)
+      .catch(() => setError('No se pudo completar. Inténtalo de nuevo.'))
+  }
+
+  const onRegister = (event: FormEvent) => {
+    event.preventDefault()
+    run(() => registerPasskey(setupToken.trim()))
+  }
 
   return (
     <main className="hello">
       <img src="/icon.svg" alt="" width={96} height={96} />
       <h1>Self Grow</h1>
-      <p className="status">
-        {health === null && 'Conectando…'}
-        {health === 'offline' && <span className="dot red" />}
-        {health === 'offline' && 'Server sin conexión (modo offline)'}
-        {health && health !== 'offline' && <span className="dot green" />}
-        {health && health !== 'offline' && 'Server online'}
-      </p>
+
+      {status === null && <p className="status">Conectando…</p>}
+
+      {status === 'offline' && (
+        <p className="status">
+          <span className="dot red" />
+          Server sin conexión (modo offline)
+        </p>
+      )}
+
+      {status !== null && status !== 'offline' && (
+        <p className="status">
+          <span className="dot green" />
+          {status.authenticated ? 'Server online · sesión iniciada' : 'Server online'}
+        </p>
+      )}
+
+      {status !== null && status !== 'offline' && !status.authenticated && status.registered && (
+        <button className="button" onClick={() => run(loginWithPasskey)}>
+          Entrar con Face ID
+        </button>
+      )}
+
+      {status !== null && status !== 'offline' && !status.authenticated && !status.registered && (
+        <form className="setup" onSubmit={onRegister}>
+          <input
+            className="input"
+            placeholder="Código de configuración"
+            autoComplete="off"
+            value={setupToken}
+            onChange={(event) => setSetupToken(event.target.value)}
+          />
+          <button className="button" disabled={!setupToken.trim()}>
+            Registrar este iPhone
+          </button>
+        </form>
+      )}
+
+      {error && <p className="error">{error}</p>}
     </main>
   )
 }

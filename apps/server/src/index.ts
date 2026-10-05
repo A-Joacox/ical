@@ -1,34 +1,31 @@
+import { mkdirSync } from 'node:fs'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import Fastify from 'fastify'
-import fastifyStatic from '@fastify/static'
+import { buildApp } from './app.ts'
+import { openDb } from './db.ts'
 
-const port = Number(process.env.PORT ?? 3000)
-const host = process.env.HOST ?? '0.0.0.0'
-const webDist = process.env.WEB_DIST ?? fileURLToPath(new URL('../../web/dist', import.meta.url))
+const env = process.env
+const port = Number(env.PORT ?? 3000)
+const host = env.HOST ?? '0.0.0.0'
+const dataDir = env.DATA_DIR ?? fileURLToPath(new URL('../../../data', import.meta.url))
+const webDist = env.WEB_DIST ?? fileURLToPath(new URL('../../web/dist', import.meta.url))
 
-const app = Fastify({ logger: true })
+if (env.NODE_ENV === 'production' && !env.SESSION_SECRET) {
+  throw new Error('Falta SESSION_SECRET en apps/server/.env')
+}
 
-app.get('/api/health', async () => ({ ok: true, time: new Date().toISOString() }))
+mkdirSync(dataDir, { recursive: true })
 
-// Sirve la PWA compilada. El SW, el HTML y el manifest se revalidan siempre para que
-// las actualizaciones lleguen al iPhone; los assets con hash se cachean para siempre.
-await app.register(fastifyStatic, {
-  root: webDist,
-  setHeaders(reply, filePath) {
-    if (/\.(html|webmanifest)$|sw\.js$/.test(filePath)) {
-      reply.header('Cache-Control', 'no-cache')
-    } else if (/[\\/]assets[\\/]/.test(filePath)) {
-      reply.header('Cache-Control', 'public, max-age=31536000, immutable')
-    }
+const app = await buildApp({
+  db: openDb(join(dataDir, 'self-grow.db')),
+  sessionSecret: env.SESSION_SECRET ?? 'dev-only-secret',
+  auth: {
+    rpID: env.RP_ID ?? 'localhost',
+    origins: (env.ORIGIN ?? 'http://localhost:3000,http://localhost:5173').split(','),
+    setupToken: env.SETUP_TOKEN,
   },
-})
-
-// Rutas del cliente (SPA): cualquier GET que no sea /api devuelve index.html.
-app.setNotFoundHandler((req, reply) => {
-  if (req.method !== 'GET' || req.url.startsWith('/api/')) {
-    return reply.code(404).send({ error: 'not_found' })
-  }
-  return reply.sendFile('index.html')
+  webDist,
+  logger: true,
 })
 
 await app.listen({ port, host })

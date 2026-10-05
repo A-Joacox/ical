@@ -1,12 +1,13 @@
 # Self Grow
 
 PWA para iPhone: calorías, gym, agenda y estado del home-server. Se instala desde Safari con
-"Añadir a pantalla de inicio" y la sirve un backend Fastify en Docker, publicado solo dentro de
-tu red Tailscale.
+"Añadir a pantalla de inicio" y la sirve un backend Fastify en Docker, publicado con Tailscale
+Funnel. La `/api` está protegida con passkey (Face ID).
 
 ```
 apps/web     PWA (Vite + React + TypeScript)
 apps/server  API + servidor de la PWA (Fastify, Node 24 ejecuta TypeScript directo)
+data/        SQLite del server (passkeys y, más adelante, el backup). No se sube a git.
 ```
 
 ## Desarrollo en el PC
@@ -14,10 +15,14 @@ apps/server  API + servidor de la PWA (Fastify, Node 24 ejecuta TypeScript direc
 ```bash
 npm install
 npm run build        # compila la PWA en apps/web/dist
-npm run dev:server   # sirve dist + /api en http://localhost:3000
+npm run dev:server   # sirve dist + /api en http://localhost:3000 (lee apps/server/.env si existe)
 npm run dev:web      # Vite con recarga en caliente en http://localhost:5173 (proxy de /api al :3000)
 npm run typecheck
+npm test -w apps/server
 ```
+
+En local las passkeys usan `localhost`. Para registrar una, crea `apps/server/.env` con solo
+`SETUP_TOKEN=<lo-que-quieras>`.
 
 ## Setup del home-server (Ubuntu, una sola vez)
 
@@ -28,25 +33,25 @@ npm run typecheck
    HandleLidSwitchDocked=ignore
    ```
    y luego `sudo systemctl restart systemd-logind`.
-2. **Tailscale:** en la consola de administración (DNS) activa **MagicDNS** y **HTTPS Certificates**.
+2. **Configuración:** `cp apps/server/.env.example apps/server/.env` y rellénalo (dominio, secretos).
 3. **Levantar la app:**
    ```bash
-   git clone <url-del-repo> self-grow-app && cd self-grow-app
    docker compose up -d --build
    curl http://localhost:3000/api/health
    ```
-4. **Publicarla con HTTPS en tu tailnet** (no queda expuesta a internet):
+4. **Publicarla con Funnel** en la raíz del 443 (la ruta `/webhook` de n8n sigue en el mismo puerto):
    ```bash
-   sudo tailscale serve --bg 3000
-   tailscale serve status   # muestra la URL https://<host>.<tailnet>.ts.net
+   sudo tailscale funnel --bg 3000
+   tailscale funnel status
    ```
 
 Para actualizar después de cada cambio: `./deploy.sh` (hace `git pull` y reconstruye el contenedor).
 
 ## Instalar en el iPhone
 
-1. Instala **Tailscale**, inicia sesión con la misma cuenta y activa *VPN On Demand*.
-2. Abre la URL `https://<host>.<tailnet>.ts.net` en Safari → Compartir → **Añadir a pantalla de inicio**
-   (con "Abrir como app web" activado).
-3. Prueba: abre la app una vez, activa el modo avión y vuelve a abrirla. Debe cargar y mostrar
-   "Server sin conexión (modo offline)".
+1. Abre `https://<host>.<tailnet>.ts.net` en Safari → Compartir → **Añadir a pantalla de inicio**.
+2. Abre la app desde el ícono, escribe el `SETUP_TOKEN` y toca **Registrar este iPhone**. La passkey
+   se guarda en el Llavero de iCloud. Las siguientes veces se entra con **Face ID**.
+3. Opcional: borra `SETUP_TOKEN` del `.env` y reinicia (`docker compose up -d`) para que nadie más
+   pueda registrar dispositivos.
+4. Prueba offline: con la app abierta una vez, activa el modo avión y vuelve a abrirla.

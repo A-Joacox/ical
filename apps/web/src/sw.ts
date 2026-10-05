@@ -10,5 +10,8 @@ self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim(
 cleanupOutdatedCaches()
 precacheAndRoute(self.__WB_MANIFEST)
 
-// SPA offline: toda navegación (salvo /api) responde con el index.html precacheado.
-registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html'), { denylist: [/^\/api\//] }))
+// SPA offline: toda navegación responde con el index.html precacheado, salvo la /api y
+// /webhook (n8n comparte este dominio en el server).
+registerRoute(
+  new NavigationRoute(createHandlerBoundToURL('index.html'), { denylist: [/^\/api\//, /^\/webhook/] }),
+)
