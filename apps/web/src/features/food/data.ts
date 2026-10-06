@@ -184,6 +184,16 @@ export function addEntry(food: Food, { grams, unit, quantity }: Amount, meal: Me
   return db.foodEntries.add(entry)
 }
 
+/** Lo reconocido en una foto, revisado: cada cosa es una entrada sin alimento asociado. */
+export function addPhotoEntries(items: (Nutrients & { name: string; grams: number })[], meal: Meal, date: string) {
+  // createdAt + índice: se guardan en el mismo milisegundo y así conservan el orden de la foto.
+  const entries = items.map(({ name, grams, kcal, protein, carbs, fat }, index): FoodEntry => {
+    const row = newRow()
+    return { ...row, createdAt: row.createdAt + index, date, meal, name, grams, kcal, protein, carbs, fat }
+  })
+  return db.foodEntries.bulkAdd(entries)
+}
+
 /** Cambia la cantidad o la comida; los nutrientes se recalculan en proporción. */
 export function updateEntry(entry: FoodEntry, { grams, unit, quantity }: Amount, meal: Meal) {
   const nutrients = scaleNutrients(per100(entry), grams / 100)

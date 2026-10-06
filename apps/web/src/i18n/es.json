@@ -78,7 +78,7 @@
     "online": "En internet",
     "searchOnline": "Buscar «{{query}}»",
     "noResults": "Sin resultados.",
-    "emptyHint": "Busca un alimento, escanea su código de barras o crea uno propio.",
+    "emptyHint": "Busca un alimento, toma una foto del plato, escanea un código de barras o crea uno propio.",
     "kcalPer100": "kcal/100 g",
     "needSession": "Inicia sesión en Ajustes para buscar en internet.",
     "offline": "Sin conexión. Puedes usar tus alimentos guardados o crear uno.",
@@ -144,7 +144,25 @@
       "clove_other": "dientes",
       "serving_one": "porción",
       "serving_other": "porciones"
-    }
+    },
+    "photo": "Foto",
+    "photoTitle": "Foto del plato",
+    "analyzing": "Analizando la foto…",
+    "photoFound": "En la foto",
+    "photoNone": "No reconocí comida en la foto.",
+    "retake": "Tomar otra foto",
+    "addAll": "Añadir a {{meal}}",
+    "remove": "Quitar",
+    "confidence": {
+      "high": "confianza alta",
+      "medium": "confianza media",
+      "low": "confianza baja"
+    },
+    "photoHint": "Son estimaciones: corrige los gramos si los sabes y quita lo que no corresponda.",
+    "photoPrivacy": "La foto se envía a Gemini (Google) para analizarla y no se guarda ni en la app ni en tu server. En el plan gratuito, Google puede usarla para mejorar sus modelos.",
+    "photoDisabled": "El análisis de fotos no está configurado: falta GEMINI_API_KEY en el server.",
+    "quotaExceeded": "Se acabó la cuota gratuita de Gemini por ahora. Inténtalo más tarde.",
+    "photoFailed": "No se pudo analizar la foto. Inténtalo de nuevo."
   },
   "muscles": {
     "chest": "Pecho",

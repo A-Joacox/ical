@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Block, BlockTitle, Button, List, ListButton, ListItem, Preloader } from 'konsta/react'
-import { PencilLine, Plus, ScanBarcode } from 'lucide-react'
+import { Camera, PencilLine, Plus, ScanBarcode } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { FoodResult } from './api'
 import { measuresOf } from './data'
@@ -24,6 +24,7 @@ type Props = {
   notice: string | null
   onPick: (food: Choice) => void
   onSearchOnline: () => void
+  onPhoto: () => void
   onScan: () => void
   onCreateFood: () => void
   onNewRecipe: () => void
@@ -37,13 +38,20 @@ export function FoodSearch(props: Props) {
 
   return (
     <>
-      <Block className="grid grid-cols-2 gap-3">
-        <Button large rounded tonal onClick={props.onScan}>
-          <ScanBarcode className="mr-1.5 h-5 w-5" />
+      {/* La foto registra lo que se comió; no sirve para elegir un ingrediente. */}
+      <Block className={`grid gap-2 ${picking ? 'grid-cols-2' : 'grid-cols-3'}`}>
+        {!picking && (
+          <Button large rounded tonal className="px-2" onClick={props.onPhoto}>
+            <Camera className="mr-1 h-5 w-5 shrink-0" />
+            {t('food.photo')}
+          </Button>
+        )}
+        <Button large rounded tonal className="px-2" onClick={props.onScan}>
+          <ScanBarcode className="mr-1 h-5 w-5 shrink-0" />
           {t('food.scan')}
         </Button>
-        <Button large rounded tonal onClick={props.onCreateFood}>
-          <PencilLine className="mr-1.5 h-5 w-5" />
+        <Button large rounded tonal className="px-2" onClick={props.onCreateFood}>
+          <PencilLine className="mr-1 h-5 w-5 shrink-0" />
           {t('food.create')}
         </Button>
       </Block>

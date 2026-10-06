@@ -1,7 +1,9 @@
 import type { FastifyInstance } from 'fastify'
+import { analyzeFoodPhoto, QuotaError, type Gemini } from './foodPhoto.ts'
 
 // Alimentos: Open Food Facts (productos envasados, en varios idiomas) y, si hay clave, USDA
 // FoodData Central (alimentos genéricos, en inglés). Todos los valores son por 100 g.
+// Y, si hay clave de Gemini, el análisis de fotos de platos.
 
 export type FoodResult = {
   source: 'off' | 'usda'
@@ -107,7 +109,10 @@ async function searchUsda(q: string, apiKey: string) {
 
 const langOf = (lang: string | undefined): Lang => (lang === 'en' ? 'en' : 'es')
 
-export function registerFoodRoutes(app: FastifyInstance, { usdaApiKey }: { usdaApiKey?: string }) {
+// Una foto de ~1024 px en JPEG pesa unos 200 KB; en base64, algo más.
+const MAX_IMAGE_BYTES = 6 * 1024 * 1024
+
+export function registerFoodRoutes(app: FastifyInstance, { usdaApiKey, gemini }: { usdaApiKey?: string; gemini?: Gemini }) {
   app.get<{ Querystring: { q?: string; lang?: string } }>('/api/food/search', async (req, reply) => {
     const q = req.query.q?.trim()
     if (!q) return reply.code(400).send({ error: 'missing_query' })
@@ -133,4 +138,21 @@ export function registerFoodRoutes(app: FastifyInstance, { usdaApiKey }: { usdaA
     const food = data?.product && fromOff(data.product, langOf(req.query.lang))
     return food ?? reply.code(404).send({ error: 'not_found' })
   })
+
+  app.post<{ Body: { image?: string; lang?: string } }>(
+    '/api/food/analyze',
+    { bodyLimit: MAX_IMAGE_BYTES + 1024, config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },
+    async (req, reply) => {
+      if (!gemini) return reply.code(503).send({ error: 'analyze_disabled' })
+      const { image, lang } = req.body ?? {}
+      if (typeof image !== 'string' || !image || image.length > MAX_IMAGE_BYTES) return reply.code(400).send({ error: 'invalid_image' })
+      try {
+        return await analyzeFoodPhoto(image, langOf(lang), gemini)
+      } catch (error) {
+        if (error instanceof QuotaError) return reply.code(429).send({ error: 'quota_exceeded' })
+        req.log.warn({ error: String(error) }, 'food photo analysis failed')
+        return reply.code(502).send({ error: 'analyze_failed' })
+      }
+    },
+  )
 }

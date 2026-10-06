@@ -1,14 +1,15 @@
-import { useState } from 'react'
+import { useRef, useState, type ChangeEvent } from 'react'
 import { Block, Link, NavbarBackLink, Page, Popup, Preloader, Searchbar } from 'konsta/react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useTranslation } from 'react-i18next'
 import { ApiError } from '../../api'
 import { ConfirmDialog } from '../../ui/ConfirmDialog'
 import { Navbar } from '../../ui/Navbar'
-import { lookupBarcode, searchFoods } from './api'
+import { analyzePhoto, lookupBarcode, searchFoods } from './api'
 import { BarcodeScanner } from './BarcodeScanner'
 import {
   addEntry,
+  addPhotoEntries,
   createFood,
   defaultAmount,
   deleteFood,
@@ -27,12 +28,14 @@ import {
 import { FoodForm } from './FoodForm'
 import { FoodSearch, keyOf, type Choice, type Online } from './FoodSearch'
 import { useFoodName } from './hooks'
+import { resizePhoto } from './photo'
+import { PhotoView, toDraft, type PhotoDraft } from './PhotoView'
 import { PortionForm } from './PortionForm'
 import { parseGrams, RecipeForm, type RecipeDraft } from './RecipeForm'
-import type { Food, Meal } from './types'
+import type { Food, Meal, Nutrients } from './types'
 
-// 'food': crear o corregir un alimento. 'recipe': crear o corregir un plato.
-type View = 'search' | 'scan' | 'food' | 'portion' | 'recipe'
+// 'food': crear o corregir un alimento. 'recipe': crear o corregir un plato. 'photo': lo reconocido en una foto.
+type View = 'search' | 'scan' | 'food' | 'portion' | 'recipe' | 'photo'
 
 const notRecipe = (food: Food) => food.source !== 'recipe'
 
@@ -54,6 +57,8 @@ export function AddFoodPopup({ opened, meal, date, onClose }: Props) {
   const [scanned, setScanned] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<{ id: string; name: string } | null>(null)
+  const [photo, setPhoto] = useState<{ preview: string; items?: PhotoDraft[]; error?: string } | null>(null)
+  const photoInput = useRef<HTMLInputElement>(null)
   const q = query.trim()
   const recipes = useLiveQuery(() => (opened ? getRecipes() : []), [opened])
   const recents = useLiveQuery(async () => (opened ? (await getRecentFoods()).filter(notRecipe) : []), [opened])
@@ -164,6 +169,35 @@ export function AddFoodPopup({ opened, meal, date, onClose }: Props) {
     show('portion')
   }
 
+  const photoError = (error: unknown) => {
+    if (!(error instanceof ApiError)) return t(error instanceof TypeError ? 'food.offline' : 'food.photoFailed')
+    const messages: Record<number, string> = { 401: 'food.needSession', 429: 'food.quotaExceeded', 503: 'food.photoDisabled' }
+    return t(messages[error.status] ?? 'food.photoFailed')
+  }
+
+  // La foto se achica en el iPhone y Gemini (vía el server) dice qué hay y cuánto.
+  const onPhoto = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    setPhoto({ preview: '' })
+    show('photo')
+    let preview = ''
+    try {
+      const resized = await resizePhoto(file)
+      preview = resized.preview
+      setPhoto({ preview })
+      setPhoto({ preview, items: (await analyzePhoto(resized.base64, lang)).map(toDraft) })
+    } catch (error) {
+      setPhoto({ preview, error: photoError(error) })
+    }
+  }
+
+  const addPhoto = async (items: (Nutrients & { name: string; grams: number })[], chosenMeal: Meal) => {
+    await addPhotoEntries(items, chosenMeal, date)
+    close()
+  }
+
   const add = async (amount: Amount, chosenMeal: Meal) => {
     if (!choice) return
     const food = 'id' in choice ? choice : await saveFoodResult(choice)
@@ -177,11 +211,13 @@ export function AddFoodPopup({ opened, meal, date, onClose }: Props) {
     food: foodForm.editing ? t('food.editFood') : t('food.newFood'),
     portion: t('food.portion'),
     recipe: draft?.id ? t('food.editDish') : t('food.newDish'),
+    photo: t('food.photoTitle'),
   }
 
   return (
     <Popup opened={opened} onBackdropClick={close}>
       <Page>
+        <input ref={photoInput} type="file" accept="image/*" hidden onChange={onPhoto} />
         <Navbar
           title={titles[view]}
           left={(view !== 'search' || picking) && <NavbarBackLink text={t('food.back')} onClick={back} />}
@@ -215,6 +251,7 @@ export function AddFoodPopup({ opened, meal, date, onClose }: Props) {
             notice={notice}
             onPick={pick}
             onSearchOnline={searchOnline}
+            onPhoto={() => photoInput.current?.click()}
             onScan={() => show('scan')}
             onCreateFood={() => {
               setFoodForm({ initial: { name: q } })
@@ -224,6 +261,16 @@ export function AddFoodPopup({ opened, meal, date, onClose }: Props) {
               setDraft({ name: '', items: [], cookedGrams: '' })
               show('recipe')
             }}
+          />
+        )}
+
+        {view === 'photo' && photo && (
+          <PhotoView
+            {...photo}
+            meal={meal}
+            onChange={(items) => setPhoto({ ...photo, items })}
+            onRetake={() => photoInput.current?.click()}
+            onAdd={addPhoto}
           />
         )}
 

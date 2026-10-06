@@ -78,7 +78,7 @@
     "online": "Online",
     "searchOnline": "Search “{{query}}”",
     "noResults": "No results.",
-    "emptyHint": "Search for a food, scan its barcode or create your own.",
+    "emptyHint": "Search for a food, take a photo of your meal, scan a barcode or create your own.",
     "kcalPer100": "kcal/100 g",
     "needSession": "Sign in under Settings to search online.",
     "offline": "You're offline. Use your saved foods or create one.",
@@ -144,7 +144,25 @@
       "clove_other": "cloves",
       "serving_one": "serving",
       "serving_other": "servings"
-    }
+    },
+    "photo": "Photo",
+    "photoTitle": "Meal photo",
+    "analyzing": "Analyzing the photo…",
+    "photoFound": "In the photo",
+    "photoNone": "I couldn't find any food in the photo.",
+    "retake": "Take another photo",
+    "addAll": "Add to {{meal}}",
+    "remove": "Remove",
+    "confidence": {
+      "high": "high confidence",
+      "medium": "medium confidence",
+      "low": "low confidence"
+    },
+    "photoHint": "These are estimates: fix the grams if you know them and remove anything that doesn't belong.",
+    "photoPrivacy": "The photo is sent to Gemini (Google) for analysis and isn't stored in the app or on your server. On the free plan, Google may use it to improve its models.",
+    "photoDisabled": "Photo analysis is not set up: GEMINI_API_KEY is missing on the server.",
+    "quotaExceeded": "The free Gemini quota is used up for now. Try again later.",
+    "photoFailed": "Couldn't analyze the photo. Please try again."
   },
   "muscles": {
     "chest": "Chest",

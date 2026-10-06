@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { Block, BlockTitle, Button, Segmented, SegmentedButton } from 'konsta/react'
+import { Block, Button } from 'konsta/react'
 import { useTranslation } from 'react-i18next'
-import { SEGMENTED_COLORS } from '../../ui/segmented'
 import { measuresOf, scaleNutrients, type Amount } from './data'
 import { useFoodName } from './hooks'
+import { MealPicker } from './MealPicker'
 import { NutrientGrid } from './NutrientGrid'
-import { MEALS, type FoodUnit, type Meal, type Nutrients, type UnitKind } from './types'
+import type { FoodUnit, Meal, Nutrients, UnitKind } from './types'
 
 type Props = {
   /** Valores por 100 g y medidas caseras. */
@@ -78,16 +78,7 @@ export function PortionForm({ food, initial, initialMeal, submitLabel, onSubmit,
         <NutrientGrid values={total} />
       </Block>
 
-      <BlockTitle>{t('food.meal')}</BlockTitle>
-      <Block>
-        <Segmented strong colors={SEGMENTED_COLORS}>
-          {MEALS.map((value) => (
-            <SegmentedButton key={value} active={meal === value} className="text-white" onClick={() => setMeal(value)}>
-              {t(`food.meals.${value}`)}
-            </SegmentedButton>
-          ))}
-        </Segmented>
-      </Block>
+      <MealPicker meal={meal} onChange={setMeal} />
 
       <Block className="space-y-3">
         <Button large rounded disabled={!valid} onClick={() => onSubmit(amount, meal)}>

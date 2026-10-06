@@ -24,3 +24,17 @@ export const searchFoods = (q: string, lang: string) => api<FoodResult[]>(`/food
 
 /** Lanza ApiError 404 si el producto no está en Open Food Facts (o no tiene calorías). */
 export const lookupBarcode = (code: string, lang: string) => api<FoodResult>(`/food/barcode/${code}?lang=${lang}`)
+
+/** Alimento reconocido en una foto: nutrientes de los gramos estimados (no por 100 g). */
+export type PhotoItem = {
+  name: string
+  grams: number
+  kcal: number
+  protein: number
+  carbs: number
+  fat: number
+  confidence: 'high' | 'medium' | 'low'
+}
+
+/** `image`: JPEG en base64. Lanza ApiError 503 si el server no tiene clave de Gemini y 429 si se acabó la cuota. */
+export const analyzePhoto = (image: string, lang: string) => api<PhotoItem[]>('/food/analyze', { image, lang })
