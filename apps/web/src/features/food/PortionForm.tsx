@@ -2,40 +2,52 @@ import { useState } from 'react'
 import { Block, BlockTitle, Button, Segmented, SegmentedButton } from 'konsta/react'
 import { useTranslation } from 'react-i18next'
 import { SEGMENTED_COLORS } from '../../ui/segmented'
-import { scaleNutrients } from './data'
+import { measuresOf, scaleNutrients, type Amount } from './data'
+import { useFoodName } from './hooks'
 import { NutrientGrid } from './NutrientGrid'
-import { MEALS, type Meal, type Nutrients } from './types'
+import { MEALS, type FoodUnit, type Meal, type Nutrients, type UnitKind } from './types'
 
 type Props = {
-  /** Valores por 100 g. */
-  food: Nutrients & { name: string; brand?: string; servingGrams?: number }
-  initialGrams: number
+  /** Valores por 100 g y medidas caseras. */
+  food: Nutrients & { name: string; nameEn?: string; brand?: string; servingGrams?: number; units?: FoodUnit[] }
+  initial: Amount
   initialMeal: Meal
   submitLabel: string
-  onSubmit: (grams: number, meal: Meal) => void
+  onSubmit: (amount: Amount, meal: Meal) => void
   /** Corregir el alimento o el plato (sus valores, no esta cantidad). */
   onEdit?: () => void
   onDelete?: () => void
 }
 
-// Cantidad y comida de un alimento, con los nutrientes calculados al momento.
-export function PortionForm({ food, initialGrams, initialMeal, submitLabel, onSubmit, onEdit, onDelete }: Props) {
-  const { t } = useTranslation()
-  const [gramsText, setGramsText] = useState(String(initialGrams))
+// Cantidad (en gramos o en una medida casera) y comida, con los nutrientes calculados al momento.
+export function PortionForm({ food, initial, initialMeal, submitLabel, onSubmit, onEdit, onDelete }: Props) {
+  const { t, i18n } = useTranslation()
+  const foodName = useFoodName()
+  const measures = measuresOf(food)
+  const initialMeasure = measures.find((m) => m.kind === initial.unit)
+  const [unit, setUnit] = useState<UnitKind | 'g'>(initialMeasure?.kind ?? 'g')
+  const [quantityText, setQuantityText] = useState(String(initialMeasure ? (initial.quantity ?? 1) : initial.grams))
   const [meal, setMeal] = useState(initialMeal)
-  const grams = Number(gramsText.replace(',', '.'))
-  const valid = grams > 0
-  const total = scaleNutrients(food, valid ? grams / 100 : 0)
 
-  const presets = [
-    ...(food.servingGrams ? [{ label: t('food.serving', { grams: food.servingGrams }), grams: food.servingGrams }] : []),
-    ...(food.servingGrams !== 100 ? [{ label: '100 g', grams: 100 }] : []),
-  ]
+  const quantity = Number(quantityText.replace(',', '.'))
+  const valid = quantity > 0
+  const measure = measures.find((m) => m.kind === unit)
+  const grams = Math.round((measure ? quantity * measure.grams : quantity) * 10) / 10
+  const total = scaleNutrients(food, valid ? grams / 100 : 0)
+  const amount: Amount = measure ? { grams, unit: measure.kind, quantity } : { grams }
+  const number = (n: number) => n.toLocaleString(i18n.language)
+
+  // Al cambiar de medida: a gramos se pasan los gramos actuales; a una medida, 1.
+  const choose = (next: UnitKind | 'g') => {
+    if (next === unit) return
+    setQuantityText(next === 'g' ? String(valid ? grams : 100) : '1')
+    setUnit(next)
+  }
 
   return (
     <>
       <Block className="text-center">
-        <h2 className="text-[22px] font-bold leading-tight">{food.name}</h2>
+        <h2 className="text-[22px] font-bold leading-tight">{foodName(food)}</h2>
         {food.brand && <p className="mt-1 text-[15px] text-label-2">{food.brand}</p>}
       </Block>
 
@@ -43,23 +55,26 @@ export function PortionForm({ food, initialGrams, initialMeal, submitLabel, onSu
         <label className="flex items-baseline justify-center gap-2">
           <input
             inputMode="decimal"
-            value={gramsText}
-            onChange={(event) => setGramsText(event.target.value)}
-            className="w-36 rounded-xl bg-surface-2 py-1 text-center text-[34px] font-bold tabular-nums outline-none"
+            value={quantityText}
+            onChange={(event) => setQuantityText(event.target.value)}
+            className="w-28 rounded-xl bg-surface-2 py-1 text-center text-[34px] font-bold tabular-nums outline-none"
           />
-          <span className="text-[22px] text-label-2">g</span>
+          <span className="text-[20px] text-label-2">{measure ? t(`food.units.${measure.kind}`, { count: quantity || 1 }) : 'g'}</span>
         </label>
-        <div className="flex justify-center gap-2">
-          {presets.map((preset) => (
-            <button
-              key={preset.label}
-              className="rounded-full bg-surface-2 px-3 py-1.5 text-[15px] active:bg-separator"
-              onClick={() => setGramsText(String(preset.grams))}
-            >
-              {preset.label}
-            </button>
-          ))}
-        </div>
+        {measure && <p className="-mt-2 text-center text-[15px] tabular-nums text-label-2">= {number(grams)} g</p>}
+        {measures.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2">
+            {[...measures, { kind: 'g' as const, grams: 1 }].map((m) => (
+              <button
+                key={m.kind}
+                className={`rounded-full px-3 py-1.5 text-[15px] ${unit === m.kind ? 'bg-agenda text-white' : 'bg-surface-2 active:bg-separator'}`}
+                onClick={() => choose(m.kind)}
+              >
+                {m.kind === 'g' ? t('food.grams') : `${t(`food.units.${m.kind}`, { count: 1 })} · ${number(m.grams)} g`}
+              </button>
+            ))}
+          </div>
+        )}
         <NutrientGrid values={total} />
       </Block>
 
@@ -75,7 +90,7 @@ export function PortionForm({ food, initialGrams, initialMeal, submitLabel, onSu
       </Block>
 
       <Block className="space-y-3">
-        <Button large rounded disabled={!valid} onClick={() => onSubmit(grams, meal)}>
+        <Button large rounded disabled={!valid} onClick={() => onSubmit(amount, meal)}>
           {submitLabel}
         </Button>
         {onEdit && (

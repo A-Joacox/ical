@@ -1,7 +1,8 @@
 import { db, newRow } from '../../db/db'
 import { normalize } from '../../text'
 import type { FoodResult } from './api'
-import type { Food, FoodEntry, Meal, Nutrients } from './types'
+import { SEED_FOODS } from './seedFoods'
+import type { Food, FoodEntry, FoodUnit, Meal, Nutrients, UnitKind } from './types'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const round1 = (value: number) => Math.round(value * 10) / 10
@@ -32,20 +33,59 @@ export function addDays(key: string, days: number) {
   return dateKey(new Date(y, m - 1, d + days))
 }
 
+// ---------- Medidas ----------
+
+/** Medidas caseras de un alimento para elegir la cantidad: su porción y las demás (taza, unidad…). */
+export const measuresOf = (food: { servingGrams?: number; units?: FoodUnit[] }): FoodUnit[] => [
+  ...(food.servingGrams ? [{ kind: 'serving' as const, grams: food.servingGrams }] : []),
+  ...(food.units ?? []),
+]
+
+export type Amount = { grams: number; unit?: UnitKind; quantity?: number }
+
+/** Cantidad con la que se propone un alimento: 1 de su primera medida o, si no tiene, 100 g. */
+export function defaultAmount(food: { servingGrams?: number; units?: FoodUnit[] }): Amount {
+  const [first] = measuresOf(food)
+  return first ? { grams: first.grams, unit: first.kind, quantity: 1 } : { grams: 100 }
+}
+
 // ---------- Alimentos ----------
+
+type SeedResult = FoodResult & { aliases?: string }
+
+const SEEDS: SeedResult[] = SEED_FOODS.map(([id, name, nameEn, kcal, protein, carbs, fat, units, aliases]) => ({
+  source: 'seed',
+  sourceId: id,
+  name,
+  nameEn,
+  kcal,
+  protein,
+  carbs,
+  fat,
+  units: units.map(([kind, grams]) => ({ kind, grams })),
+  aliases,
+}))
+
+/** Alimentos precargados que coinciden con la búsqueda (también por sinónimos); primero los que empiezan así. */
+export function searchSeedFoods(query: string): FoodResult[] {
+  const q = normalize(query.trim())
+  const text = (food: SeedResult) => normalize(`${food.name} ${food.nameEn} ${food.aliases ?? ''}`)
+  const matches = SEEDS.filter((food) => text(food).includes(q))
+  return matches.sort((a, b) => Number(normalize(b.name).startsWith(q)) - Number(normalize(a.name).startsWith(q)))
+}
 
 /** Guarda un resultado de la búsqueda o del código de barras para tenerlo offline (una sola vez). */
 export async function saveFoodResult(result: FoodResult): Promise<Food> {
   const id = `${result.source}:${result.sourceId}`
   const existing = await db.foods.get(id)
   if (existing && !existing.deletedAt) return existing
-  const { name, brand, barcode, kcal, protein, carbs, fat, servingGrams, source } = result
-  const food: Food = { ...newRow(), id, name, brand, barcode, kcal, protein, carbs, fat, servingGrams, source }
+  const { name, nameEn, brand, barcode, kcal, protein, carbs, fat, servingGrams, units, source } = result
+  const food: Food = { ...newRow(), id, name, nameEn, brand, barcode, kcal, protein, carbs, fat, servingGrams, units, source }
   await db.foods.put(food)
   return food
 }
 
-export type FoodValues = Pick<Food, 'name' | 'brand' | 'barcode' | 'servingGrams'> & Nutrients
+export type FoodValues = Pick<Food, 'name' | 'nameEn' | 'brand' | 'barcode' | 'servingGrams' | 'units'> & Nutrients
 
 export async function createFood(values: FoodValues): Promise<Food> {
   const food: Food = { ...newRow(), ...values, source: 'custom' }
@@ -123,7 +163,7 @@ export const findFoodByBarcode = (code: string) =>
 /** Alimentos guardados en el iPhone cuyo nombre o marca contiene el texto. */
 export async function searchLocalFoods(query: string) {
   const q = normalize(query.trim())
-  return (await db.foods.toArray()).filter((f) => !f.deletedAt && normalize(`${f.name} ${f.brand ?? ''}`).includes(q))
+  return (await db.foods.toArray()).filter((f) => !f.deletedAt && normalize(`${f.name} ${f.nameEn ?? ''} ${f.brand ?? ''}`).includes(q))
 }
 
 /** Alimentos usados en los últimos 30 días, del más reciente al más antiguo. */
@@ -138,14 +178,16 @@ export async function getRecentFoods(limit = 25) {
 
 // ---------- Registro del día ----------
 
-export function addEntry(food: Food, grams: number, meal: Meal, date: string) {
-  const entry: FoodEntry = { ...newRow(), date, meal, foodId: food.id, name: food.name, grams, ...scaleNutrients(food, grams / 100) }
+export function addEntry(food: Food, { grams, unit, quantity }: Amount, meal: Meal, date: string) {
+  const nutrients = scaleNutrients(food, grams / 100)
+  const entry: FoodEntry = { ...newRow(), date, meal, foodId: food.id, name: food.name, grams, unit, quantity, ...nutrients }
   return db.foodEntries.add(entry)
 }
 
-/** Cambia los gramos o la comida; los nutrientes se recalculan en proporción. */
-export function updateEntry(entry: FoodEntry, grams: number, meal: Meal) {
-  return db.foodEntries.update(entry.id, { grams, meal, ...scaleNutrients(per100(entry), grams / 100), updatedAt: Date.now() })
+/** Cambia la cantidad o la comida; los nutrientes se recalculan en proporción. */
+export function updateEntry(entry: FoodEntry, { grams, unit, quantity }: Amount, meal: Meal) {
+  const nutrients = scaleNutrients(per100(entry), grams / 100)
+  return db.foodEntries.update(entry.id, { grams, unit, quantity, meal, ...nutrients, updatedAt: Date.now() })
 }
 
 export function deleteEntry(id: string) {

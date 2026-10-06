@@ -2,6 +2,7 @@ import { Block, BlockFooter, BlockTitle, Button, Link, List, ListButton, ListInp
 import { Plus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { recipeValues, scaleNutrients, sumNutrients } from './data'
+import { useFoodName } from './hooks'
 import { NutrientGrid } from './NutrientGrid'
 import type { Food } from './types'
 
@@ -25,6 +26,7 @@ type Props = {
 // Plato casero: ingredientes con sus gramos y, si se cocinó en cantidad, el peso final.
 export function RecipeForm({ draft, onChange, onAddIngredient, onSave, onDelete }: Props) {
   const { t } = useTranslation()
+  const foodName = useFoodName()
   const items = draft.items.map((item) => ({ food: item.food, grams: parseGrams(item.grams) ?? 0 }))
   const cookedGrams = parseGrams(draft.cookedGrams)
   const rawGrams = items.reduce((sum, item) => sum + item.grams, 0)
@@ -46,7 +48,7 @@ export function RecipeForm({ draft, onChange, onAddIngredient, onSave, onDelete 
         {draft.items.map((item, index) => (
           <ListItem
             key={`${item.food.id}-${index}`}
-            title={item.food.name}
+            title={foodName(item.food)}
             subtitle={`${Math.round(scaleNutrients(item.food, items[index].grams / 100).kcal)} kcal`}
             after={
               <span className="flex items-center gap-1.5">

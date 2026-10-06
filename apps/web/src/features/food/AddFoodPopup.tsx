@@ -10,6 +10,7 @@ import { BarcodeScanner } from './BarcodeScanner'
 import {
   addEntry,
   createFood,
+  defaultAmount,
   deleteFood,
   findFoodByBarcode,
   getIngredients,
@@ -18,11 +19,14 @@ import {
   saveFoodResult,
   saveRecipe,
   searchLocalFoods,
+  searchSeedFoods,
   updateFood,
+  type Amount,
   type FoodValues,
 } from './data'
 import { FoodForm } from './FoodForm'
 import { FoodSearch, keyOf, type Choice, type Online } from './FoodSearch'
+import { useFoodName } from './hooks'
 import { PortionForm } from './PortionForm'
 import { parseGrams, RecipeForm, type RecipeDraft } from './RecipeForm'
 import type { Food, Meal } from './types'
@@ -39,6 +43,7 @@ type Props = { opened: boolean; meal: Meal; date: string; onClose: () => void }
 export function AddFoodPopup({ opened, meal, date, onClose }: Props) {
   const { t, i18n } = useTranslation()
   const lang = i18n.resolvedLanguage ?? 'es'
+  const foodName = useFoodName()
   const [view, setView] = useState<View>('search')
   const [query, setQuery] = useState('')
   const [online, setOnline] = useState<Online | null>(null)
@@ -52,7 +57,13 @@ export function AddFoodPopup({ opened, meal, date, onClose }: Props) {
   const q = query.trim()
   const recipes = useLiveQuery(() => (opened ? getRecipes() : []), [opened])
   const recents = useLiveQuery(async () => (opened ? (await getRecentFoods()).filter(notRecipe) : []), [opened])
-  const local = useLiveQuery(async () => (q ? (await searchLocalFoods(q)).filter((f) => !picking || notRecipe(f)) : []), [q, picking])
+  // Lo guardado en el iPhone y los alimentos precargados que aún no se han usado.
+  const local = useLiveQuery(async (): Promise<Choice[]> => {
+    if (!q) return []
+    const saved = (await searchLocalFoods(q)).filter((f) => !picking || notRecipe(f))
+    const ids = new Set(saved.map((f) => f.id))
+    return [...saved, ...searchSeedFoods(q).filter((seed) => !ids.has(`seed:${seed.sourceId}`))]
+  }, [q, picking])
 
   const show = (next: View) => {
     setNotice(null)
@@ -78,7 +89,7 @@ export function AddFoodPopup({ opened, meal, date, onClose }: Props) {
       return show('portion')
     }
     const saved = 'id' in food ? food : await saveFoodResult(food)
-    setDraft((d) => d && { ...d, items: [...d.items, { food: saved, grams: String(saved.servingGrams ?? 100) }] })
+    setDraft((d) => d && { ...d, items: [...d.items, { food: saved, grams: String(defaultAmount(saved).grams) }] })
     setPicking(false)
     resetSearch()
     show('recipe')
@@ -129,7 +140,9 @@ export function AddFoodPopup({ opened, meal, date, onClose }: Props) {
 
   const saveFood = async (values: FoodValues) => {
     if (!foodForm.editing) return pick(await createFood(values))
-    setChoice(await updateFood(foodForm.editing.id, values))
+    // El nombre en inglés de un precargado deja de valer si se cambia el nombre.
+    const { editing } = foodForm
+    setChoice(await updateFood(editing.id, { ...values, nameEn: values.name === editing.name ? editing.nameEn : undefined }))
     show('portion')
   }
 
@@ -151,10 +164,10 @@ export function AddFoodPopup({ opened, meal, date, onClose }: Props) {
     show('portion')
   }
 
-  const add = async (grams: number, chosenMeal: Meal) => {
+  const add = async (amount: Amount, chosenMeal: Meal) => {
     if (!choice) return
     const food = 'id' in choice ? choice : await saveFoodResult(choice)
-    await addEntry(food, grams, chosenMeal, date)
+    await addEntry({ ...food, name: foodName(food) }, amount, chosenMeal, date)
     close()
   }
 
@@ -255,7 +268,7 @@ export function AddFoodPopup({ opened, meal, date, onClose }: Props) {
           <PortionForm
             key={`${keyOf(choice)}-${'updatedAt' in choice ? choice.updatedAt : ''}`}
             food={choice}
-            initialGrams={choice.servingGrams ?? 100}
+            initial={defaultAmount(choice)}
             initialMeal={meal}
             submitLabel={t('food.add')}
             onSubmit={add}

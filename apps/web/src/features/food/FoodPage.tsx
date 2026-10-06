@@ -1,11 +1,13 @@
 import { Fragment, useState } from 'react'
 import { BlockTitle, Link, List, ListButton, ListItem, Page, Popup } from 'konsta/react'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { db } from '../../db/db'
 import { Navbar } from '../../ui/Navbar'
 import { TabPage } from '../../ui/TabPage'
 import { AddFoodPopup } from './AddFoodPopup'
-import { addDays, dateKey, deleteEntry, per100, sumNutrients, updateEntry } from './data'
+import { addDays, dateKey, deleteEntry, measuresOf, per100, sumNutrients, updateEntry } from './data'
 import { DaySummary } from './DaySummary'
 import { useDayEntries } from './hooks'
 import { PortionForm } from './PortionForm'
@@ -13,7 +15,13 @@ import { MEALS, type FoodEntry, type Meal } from './types'
 
 // Registro de comidas de un día: resumen frente a los objetivos y entradas por comida.
 export function FoodPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  // "2 unidades medianas · 88 g" si se registró en una medida casera; si no, solo los gramos.
+  const amountText = (entry: FoodEntry) => {
+    const grams = `${entry.grams.toLocaleString(i18n.language)} g`
+    if (!entry.unit || !entry.quantity) return grams
+    return `${entry.quantity.toLocaleString(i18n.language)} ${t(`food.units.${entry.unit}`, { count: entry.quantity })} · ${grams}`
+  }
   const today = dateKey(new Date())
   const [day, setDay] = useState(today)
   const entries = useDayEntries(day) ?? []
@@ -42,7 +50,7 @@ export function FoodPage() {
                   key={entry.id}
                   link
                   title={entry.name}
-                  subtitle={`${entry.grams} g`}
+                  subtitle={amountText(entry)}
                   after={<span className="tabular-nums">{Math.round(entry.kcal)} kcal</span>}
                   onClick={() => setEditing({ opened: true, entry })}
                 />
@@ -75,14 +83,21 @@ export function FoodPage() {
 
 function EntryForm({ entry, onDone }: { entry: FoodEntry; onDone: () => void }) {
   const { t } = useTranslation()
+  // Las medidas caseras vienen del alimento, si sigue guardado; la de la entrada se mantiene siempre.
+  const food = useLiveQuery(async () => (entry.foodId ? ((await db.foods.get(entry.foodId)) ?? null) : null), [entry.foodId])
+  if (food === undefined) return null
+  const units = [...(food?.units ?? [])]
+  const hasUnit = measuresOf({ servingGrams: food?.servingGrams, units }).some((m) => m.kind === entry.unit)
+  if (entry.unit && entry.quantity && !hasUnit) units.push({ kind: entry.unit, grams: entry.grams / entry.quantity })
+
   return (
     <PortionForm
-      food={{ ...per100(entry), name: entry.name }}
-      initialGrams={entry.grams}
+      food={{ ...per100(entry), name: entry.name, servingGrams: food?.servingGrams, units }}
+      initial={{ grams: entry.grams, unit: entry.unit, quantity: entry.quantity }}
       initialMeal={entry.meal}
       submitLabel={t('food.save')}
-      onSubmit={async (grams, meal) => {
-        await updateEntry(entry, grams, meal)
+      onSubmit={async (amount, meal) => {
+        await updateEntry(entry, amount, meal)
         onDone()
       }}
       onDelete={async () => {

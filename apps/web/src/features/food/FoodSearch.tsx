@@ -3,6 +3,8 @@ import { Block, BlockTitle, Button, List, ListButton, ListItem, Preloader } from
 import { PencilLine, Plus, ScanBarcode } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { FoodResult } from './api'
+import { measuresOf } from './data'
+import { useFoodName } from './hooks'
 import type { Food } from './types'
 
 // Un alimento ya guardado en el iPhone o un resultado del server (se guarda al usarlo).
@@ -17,7 +19,7 @@ type Props = {
   picking: boolean
   recipes: Food[]
   recents: Food[]
-  local: Food[]
+  local: Choice[]
   online: Online | null
   notice: string | null
   onPick: (food: Choice) => void
@@ -101,10 +103,14 @@ export function FoodSearch(props: Props) {
 
 function FoodList({ foods, onPick, children }: { foods: Choice[]; onPick: (food: Choice) => void; children?: ReactNode }) {
   const { t } = useTranslation()
-  const subtitle = (food: Choice) =>
-    'ingredients' in food && food.ingredients
-      ? t('food.ingredientsCount', { count: food.ingredients.length })
-      : [food.brand, food.source === 'usda' && 'USDA'].filter(Boolean).join(' · ') || undefined
+  const foodName = useFoodName()
+  // Ingredientes de un plato, marca y origen o, si no hay, su primera medida casera.
+  const subtitle = (food: Choice) => {
+    if ('ingredients' in food && food.ingredients) return t('food.ingredientsCount', { count: food.ingredients.length })
+    const origin = [food.brand, food.source === 'usda' && 'USDA'].filter(Boolean).join(' · ')
+    const [measure] = measuresOf(food)
+    return origin || (measure && `1 ${t(`food.units.${measure.kind}`, { count: 1 })} = ${measure.grams} g`) || undefined
+  }
 
   return (
     <List strong inset dividers>
@@ -112,7 +118,7 @@ function FoodList({ foods, onPick, children }: { foods: Choice[]; onPick: (food:
         <ListItem
           key={keyOf(food)}
           link
-          title={food.name}
+          title={foodName(food)}
           subtitle={subtitle(food)}
           after={
             <span className="tabular-nums">

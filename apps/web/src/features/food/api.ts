@@ -1,10 +1,16 @@
 import { api } from '../../api'
+import type { FoodUnit } from './types'
 
-/** Alimento encontrado por el server (Open Food Facts o USDA). Valores por 100 g. */
+/**
+ * Alimento que aún no está guardado en el iPhone: del server (Open Food Facts o USDA) o de la lista
+ * precargada. Valores por 100 g. Se guarda al usarlo.
+ */
 export type FoodResult = {
-  source: 'off' | 'usda'
+  source: 'off' | 'usda' | 'seed'
   sourceId: string
   name: string
+  nameEn?: string
+  units?: FoodUnit[]
   brand?: string
   barcode?: string
   kcal: number
