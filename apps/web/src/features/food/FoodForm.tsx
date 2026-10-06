@@ -16,12 +16,29 @@ const NUTRIENT_FIELDS = [
   { key: 'fat', label: 'food.fat' },
 ] as const
 
-type Props = { initialName: string; barcode?: string; onSave: (values: FoodValues) => void }
+type Props = {
+  /** Valores con los que empieza: solo el nombre o el código al crear, todos al editar. */
+  initial: Partial<FoodValues>
+  submitLabel: string
+  onSave: (values: FoodValues) => void
+  onDelete?: () => void
+}
 
-// Alimento propio con los datos de la etiqueta (por 100 g).
-export function FoodForm({ initialName, barcode, onSave }: Props) {
+const toText = (value: number | undefined) => (value === undefined ? '' : String(value))
+
+// Alimento con los datos de la etiqueta (por 100 g), para crearlo o corregirlo.
+export function FoodForm({ initial, submitLabel, onSave, onDelete }: Props) {
   const { t } = useTranslation()
-  const [text, setText] = useState({ name: initialName, brand: '', kcal: '', protein: '', carbs: '', fat: '', serving: '' })
+  const [text, setText] = useState({
+    name: initial.name ?? '',
+    brand: initial.brand ?? '',
+    kcal: toText(initial.kcal),
+    protein: toText(initial.protein),
+    carbs: toText(initial.carbs),
+    fat: toText(initial.fat),
+    serving: toText(initial.servingGrams),
+  })
+  const { barcode } = initial
   const set = (key: keyof typeof text) => (event: { target: { value: string } }) => setText({ ...text, [key]: event.target.value })
   const kcal = parseNumber(text.kcal)
   const valid = !!text.name.trim() && kcal !== undefined
@@ -57,10 +74,15 @@ export function FoodForm({ initialName, barcode, onSave }: Props) {
         <ListInput label={t('food.servingGrams')} inputMode="decimal" value={text.serving} onChange={set('serving')} />
       </List>
 
-      <Block>
+      <Block className="space-y-3">
         <Button large rounded disabled={!valid} onClick={save}>
-          {t('food.saveAndContinue')}
+          {submitLabel}
         </Button>
+        {onDelete && (
+          <Button large rounded clear colors={{ textIos: 'text-danger' }} onClick={onDelete}>
+            {t('food.deleteFood')}
+          </Button>
+        )}
       </Block>
     </>
   )

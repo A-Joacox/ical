@@ -16,8 +16,14 @@ export type Food = Row &
     barcode?: string
     /** Gramos de una porción, si se conoce. */
     servingGrams?: number
-    source: 'off' | 'usda' | 'custom'
+    source: 'off' | 'usda' | 'custom' | 'recipe'
+    /** Solo platos: ingredientes con sus gramos. Los valores por 100 g se calculan al guardar. */
+    ingredients?: Ingredient[]
+    /** Solo platos: peso final cocinado; si no está, se usa la suma de los ingredientes. */
+    cookedGrams?: number
   }
+
+export type Ingredient = { foodId: string; grams: number }
 
 /** Lo que se comió: nombre y nutrientes ya calculados para los gramos (no cambian si cambia el alimento). */
 export type FoodEntry = Row &

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { addDays, dateKey, per100, scaleNutrients, sumNutrients } from './data'
+import { addDays, dateKey, per100, recipeValues, scaleNutrients, sumNutrients } from './data'
 import type { FoodEntry } from './types'
 
 describe('nutrientes', () => {
@@ -15,6 +15,23 @@ describe('nutrientes', () => {
   test('suma del día', () => {
     expect(sumNutrients([nutella, nutella])).toEqual({ kcal: 1078, protein: 12.6, carbs: 115, fat: 61.8 })
     expect(sumNutrients([])).toEqual({ kcal: 0, protein: 0, carbs: 0, fat: 0 })
+  })
+})
+
+describe('platos', () => {
+  // Arroz y frijoles en crudo, pollo al horno; valores por 100 g.
+  const items = [
+    { food: { kcal: 360, protein: 7, carbs: 79, fat: 0.6 }, grams: 200 },
+    { food: { kcal: 341, protein: 21, carbs: 62, fat: 1.2 }, grams: 150 },
+    { food: { kcal: 165, protein: 31, carbs: 0, fat: 3.6 }, grams: 180 },
+  ]
+
+  test('sin peso cocinado: por 100 g de lo crudo y una porción es el plato entero', () => {
+    expect(recipeValues(items)).toEqual({ kcal: 288.4, protein: 19.1, carbs: 47.4, fat: 1.8, servingGrams: 530 })
+  })
+
+  test('con peso cocinado: por 100 g de lo cocinado (la olla de 1200 g tiene las mismas 1528 kcal)', () => {
+    expect(recipeValues(items, 1200)).toEqual({ kcal: 127.4, protein: 8.4, carbs: 20.9, fat: 0.8, servingGrams: undefined })
   })
 })
 

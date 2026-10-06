@@ -53,6 +53,66 @@ export async function createFood(values: FoodValues): Promise<Food> {
   return food
 }
 
+/** Corrige un alimento y recalcula los platos que lo usan. */
+export async function updateFood(id: string, values: FoodValues) {
+  await db.foods.update(id, { ...values, updatedAt: Date.now() })
+  const recipes = await db.foods.filter((f) => !f.deletedAt && !!f.ingredients?.some((i) => i.foodId === id)).toArray()
+  for (const recipe of recipes) {
+    await db.foods.update(recipe.id, { ...recipeValues(await getIngredients(recipe), recipe.cookedGrams), updatedAt: Date.now() })
+  }
+  return (await db.foods.get(id))!
+}
+
+/** Borrado suave: lo ya registrado no cambia y los platos conservan sus valores. */
+export function deleteFood(id: string) {
+  const now = Date.now()
+  return db.foods.update(id, { deletedAt: now, updatedAt: now })
+}
+
+// ---------- Platos ----------
+
+export type RecipeItem = { food: Food; grams: number }
+
+/**
+ * Valores por 100 g de un plato: lo que suman sus ingredientes dividido por el peso del plato
+ * (el cocinado si se indica, porque el arroz o las menestras cambian de peso al cocerse).
+ * Sin peso cocinado, una porción es el plato entero.
+ */
+export function recipeValues(items: { food: Nutrients; grams: number }[], cookedGrams?: number) {
+  const total = sumNutrients(items.map((i) => scaleNutrients(i.food, i.grams / 100)))
+  const rawGrams = items.reduce((sum, i) => sum + i.grams, 0)
+  const weight = cookedGrams || rawGrams
+  return { ...scaleNutrients(total, weight ? 100 / weight : 0), servingGrams: cookedGrams ? undefined : rawGrams }
+}
+
+/** Ingredientes de un plato con su alimento (aunque luego se haya borrado). */
+export async function getIngredients(recipe: Food): Promise<RecipeItem[]> {
+  const ingredients = recipe.ingredients ?? []
+  const foods = await db.foods.bulkGet(ingredients.map((i) => i.foodId))
+  return ingredients.flatMap((ingredient, n) => (foods[n] ? [{ food: foods[n], grams: ingredient.grams }] : []))
+}
+
+export async function saveRecipe({ id, name, items, cookedGrams }: { id?: string; name: string; items: RecipeItem[]; cookedGrams?: number }) {
+  const fields = {
+    name,
+    ingredients: items.map((i) => ({ foodId: i.food.id, grams: i.grams })),
+    cookedGrams,
+    ...recipeValues(items, cookedGrams),
+  }
+  if (id) {
+    await db.foods.update(id, { ...fields, updatedAt: Date.now() })
+    return (await db.foods.get(id))!
+  }
+  const recipe: Food = { ...newRow(), ...fields, source: 'recipe' }
+  await db.foods.add(recipe)
+  return recipe
+}
+
+export async function getRecipes() {
+  const recipes = await db.foods.filter((f) => f.source === 'recipe' && !f.deletedAt).toArray()
+  return recipes.sort((a, b) => a.name.localeCompare(b.name))
+}
+
 export const findFoodByBarcode = (code: string) =>
   db.foods
     .where('barcode')

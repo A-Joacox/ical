@@ -3,6 +3,7 @@ import { Block, BlockTitle, Button, Segmented, SegmentedButton } from 'konsta/re
 import { useTranslation } from 'react-i18next'
 import { SEGMENTED_COLORS } from '../../ui/segmented'
 import { scaleNutrients } from './data'
+import { NutrientGrid } from './NutrientGrid'
 import { MEALS, type Meal, type Nutrients } from './types'
 
 type Props = {
@@ -12,11 +13,13 @@ type Props = {
   initialMeal: Meal
   submitLabel: string
   onSubmit: (grams: number, meal: Meal) => void
+  /** Corregir el alimento o el plato (sus valores, no esta cantidad). */
+  onEdit?: () => void
   onDelete?: () => void
 }
 
 // Cantidad y comida de un alimento, con los nutrientes calculados al momento.
-export function PortionForm({ food, initialGrams, initialMeal, submitLabel, onSubmit, onDelete }: Props) {
+export function PortionForm({ food, initialGrams, initialMeal, submitLabel, onSubmit, onEdit, onDelete }: Props) {
   const { t } = useTranslation()
   const [gramsText, setGramsText] = useState(String(initialGrams))
   const [meal, setMeal] = useState(initialMeal)
@@ -27,12 +30,6 @@ export function PortionForm({ food, initialGrams, initialMeal, submitLabel, onSu
   const presets = [
     ...(food.servingGrams ? [{ label: t('food.serving', { grams: food.servingGrams }), grams: food.servingGrams }] : []),
     ...(food.servingGrams !== 100 ? [{ label: '100 g', grams: 100 }] : []),
-  ]
-  const values = [
-    { label: 'kcal', value: Math.round(total.kcal), color: 'text-food' },
-    { label: t('macros.protein'), value: `${Math.round(total.protein)} g`, color: 'text-protein' },
-    { label: t('macros.carbs'), value: `${Math.round(total.carbs)} g`, color: 'text-carbs' },
-    { label: t('macros.fat'), value: `${Math.round(total.fat)} g`, color: 'text-fat' },
   ]
 
   return (
@@ -63,14 +60,7 @@ export function PortionForm({ food, initialGrams, initialMeal, submitLabel, onSu
             </button>
           ))}
         </div>
-        <div className="grid grid-cols-4 text-center">
-          {values.map((item) => (
-            <div key={item.label}>
-              <div className={`text-[20px] font-bold tabular-nums ${item.color}`}>{item.value}</div>
-              <div className="text-[12px] text-label-2">{item.label}</div>
-            </div>
-          ))}
-        </div>
+        <NutrientGrid values={total} />
       </Block>
 
       <BlockTitle>{t('food.meal')}</BlockTitle>
@@ -88,6 +78,11 @@ export function PortionForm({ food, initialGrams, initialMeal, submitLabel, onSu
         <Button large rounded disabled={!valid} onClick={() => onSubmit(grams, meal)}>
           {submitLabel}
         </Button>
+        {onEdit && (
+          <Button large rounded clear onClick={onEdit}>
+            {t('food.edit')}
+          </Button>
+        )}
         {onDelete && (
           <Button large rounded clear colors={{ textIos: 'text-danger' }} onClick={onDelete}>
             {t('food.delete')}
