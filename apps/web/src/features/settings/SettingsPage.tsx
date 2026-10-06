@@ -5,6 +5,7 @@ import { saveGoals, saveWeightUnit, useGoals, useWeightUnit, type Goals } from '
 import { LANGUAGES } from '../../i18n'
 import { TabPage } from '../../ui/TabPage'
 import { AccountSection } from './AccountSection'
+import { BackupSection } from './BackupSection'
 import { NotificationsSection } from './NotificationsSection'
 import { Navbar } from '../../ui/Navbar'
 
@@ -85,6 +86,7 @@ export function SettingsPage() {
       </List>
 
       <AccountSection />
+      <BackupSection />
       <NotificationsSection />
     </TabPage>
   )

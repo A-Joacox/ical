@@ -145,6 +145,18 @@
     "notificationsDenied": "Permission denied. Enable it in iOS Settings → Notifications → Self Grow.",
     "notificationsNeedSession": "Sign in under Account to turn them on.",
     "notificationsServerOff": "Notifications are not configured on the server (missing VAPID keys).",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "backup": "Backup",
+    "lastBackup": "Last backup",
+    "never": "Never",
+    "backupNow": "Back up now",
+    "restore": "Restore from server",
+    "backupDone": "Backup up to date.",
+    "backupNeedSession": "Sign in under Account to use the backup.",
+    "backupFooter": "Your data lives on the iPhone and is copied to the server when you open the app (at most every 15 min). Restoring never deletes anything: the most recent version of each item wins.",
+    "restoreTitle": "Restore from server?",
+    "restoreText": "Routines, workouts and settings saved on the server will be brought back.",
+    "restoreConfirm": "Restore",
+    "restoreDone": "Data restored."
   }
 }

@@ -17,6 +17,13 @@ export function openDb(file: string) {
       lang TEXT NOT NULL DEFAULT 'es',
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+    CREATE TABLE IF NOT EXISTS backup_rows (
+      tbl TEXT NOT NULL,
+      id TEXT NOT NULL,
+      updated_at INTEGER NOT NULL,
+      data TEXT NOT NULL,
+      PRIMARY KEY (tbl, id)
+    );
   `)
   return db
 }

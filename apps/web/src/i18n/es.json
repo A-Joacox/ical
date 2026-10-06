@@ -145,6 +145,18 @@
     "notificationsDenied": "Permiso denegado. Actívalo en Ajustes de iOS → Notificaciones → Self Grow.",
     "notificationsNeedSession": "Inicia sesión en Cuenta para activarlas.",
     "notificationsServerOff": "El server no tiene configuradas las notificaciones (faltan las claves VAPID).",
-    "error": "No se pudo completar. Inténtalo de nuevo."
+    "error": "No se pudo completar. Inténtalo de nuevo.",
+    "backup": "Backup",
+    "lastBackup": "Último backup",
+    "never": "Nunca",
+    "backupNow": "Hacer backup ahora",
+    "restore": "Restaurar desde el server",
+    "backupDone": "Backup al día.",
+    "backupNeedSession": "Inicia sesión en Cuenta para usar el backup.",
+    "backupFooter": "Tus datos se guardan en el iPhone y se copian al server al abrir la app (como mucho cada 15 min). Restaurar no borra nada: por cada dato se queda la versión más reciente.",
+    "restoreTitle": "¿Restaurar desde el server?",
+    "restoreText": "Se traerán las rutinas, entrenamientos y ajustes guardados en el server.",
+    "restoreConfirm": "Restaurar",
+    "restoreDone": "Datos restaurados."
   }
 }

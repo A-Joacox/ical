@@ -4,6 +4,7 @@ import fastifyCookie from '@fastify/cookie'
 import fastifyRateLimit from '@fastify/rate-limit'
 import fastifyStatic from '@fastify/static'
 import { registerAuth, type AuthConfig } from './auth.ts'
+import { registerBackupRoutes } from './backup.ts'
 import type { ServerStatus } from './glances.ts'
 import { registerPushRoutes, type Push } from './push.ts'
 
@@ -38,6 +39,8 @@ export async function buildApp({ db, auth, sessionSecret, getStatus, push, webDi
       return reply.code(503).send({ error: 'monitor_unavailable' })
     }
   })
+
+  registerBackupRoutes(app, db)
 
   if (push) registerPushRoutes(app, push)
   else app.all('/api/push/*', async (_req, reply) => reply.code(503).send({ error: 'push_disabled' }))

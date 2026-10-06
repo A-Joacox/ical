@@ -7,7 +7,7 @@ Funnel. La `/api` está protegida con passkey (Face ID).
 ```
 apps/web     PWA (Vite + React + TypeScript)
 apps/server  API + servidor de la PWA (Fastify, Node 24 ejecuta TypeScript directo)
-data/        SQLite del server (passkeys, suscripciones push y, más adelante, el backup). No se sube a git.
+data/        SQLite del server (passkeys, suscripciones push y el backup de la app). No se sube a git.
 ```
 
 ## Desarrollo en el PC
@@ -32,7 +32,12 @@ En local las passkeys usan `localhost`. Para registrar una, crea `apps/server/.e
    HandleLidSwitchExternalPower=ignore
    HandleLidSwitchDocked=ignore
    ```
-   y luego `sudo systemctl restart systemd-logind`.
+   Desactiva también la suspensión automática de GNOME y reinicia (reiniciar solo `systemd-logind`
+   puede cerrar la sesión gráfica):
+   ```bash
+   sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+   sudo reboot
+   ```
 2. **Configuración:** `cp apps/server/.env.example apps/server/.env` y rellénalo (dominio, secretos).
 3. **Levantar la app** (también arranca Glances, que lee las métricas del host):
    ```bash
@@ -64,3 +69,6 @@ Para actualizar después de cada cambio: `./deploy.sh` (hace `git pull` y recons
    pueda registrar dispositivos.
 4. Prueba offline: con la app abierta una vez, activa el modo avión y vuelve a abrirla.
 5. Notificaciones: Ajustes → **Activar notificaciones** → **Enviar notificación de prueba**.
+6. Backup: con la sesión iniciada, la app copia sus datos al server al abrirla (como mucho cada
+   15 min). Si reinstalas la app o se borran sus datos: inicia sesión y toca Ajustes → **Restaurar
+   desde el server**.
