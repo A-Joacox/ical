@@ -38,6 +38,7 @@ const app = await buildApp({
   auth: { rpID: env.RP_ID ?? 'localhost', origins, setupToken: env.SETUP_TOKEN },
   getStatus,
   push,
+  usdaApiKey: env.USDA_API_KEY,
   webDist,
   logger: true,
 })

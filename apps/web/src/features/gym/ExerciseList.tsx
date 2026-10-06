@@ -1,12 +1,10 @@
 import { Fragment } from 'react'
 import { BlockTitle, List, ListButton, ListItem, Searchbar } from 'konsta/react'
 import { useTranslation } from 'react-i18next'
+import { normalize } from '../../text'
 import { ExerciseThumb } from './ExerciseMedia'
 import { useExerciseMap, useExerciseName } from './hooks'
 import { MUSCLES, type Exercise } from './types'
-
-// Sin tildes y en minúsculas, para que "press banca" encuentre "Press de banca".
-const normalize = (text: string) => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
 /** Buscador de ejercicios. Va en el `subnavbar` del Navbar para que respete la zona segura. */
 export function ExerciseSearchbar({ value, onChange }: { value: string; onChange: (value: string) => void }) {

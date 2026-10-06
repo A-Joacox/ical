@@ -25,7 +25,8 @@
     "workbox-expiration": "^7.4.1",
     "workbox-precaching": "^7.4.1",
     "workbox-routing": "^7.4.1",
-    "workbox-strategies": "^7.4.1"
+    "workbox-strategies": "^7.4.1",
+    "zxing-wasm": "^3.1.5"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",

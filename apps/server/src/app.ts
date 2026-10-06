@@ -5,6 +5,7 @@ import fastifyRateLimit from '@fastify/rate-limit'
 import fastifyStatic from '@fastify/static'
 import { registerAuth, type AuthConfig } from './auth.ts'
 import { registerBackupRoutes } from './backup.ts'
+import { registerFoodRoutes } from './food.ts'
 import type { ServerStatus } from './glances.ts'
 import { registerPushRoutes, type Push } from './push.ts'
 
@@ -16,12 +17,14 @@ export type AppOptions = {
   getStatus?: () => Promise<ServerStatus>
   /** Notificaciones push. Sin claves VAPID, /api/push/* responde 503. */
   push?: Push
+  /** Clave de USDA FoodData Central; sin ella la búsqueda usa solo Open Food Facts. */
+  usdaApiKey?: string
   /** Carpeta con la PWA compilada; sin ella solo se sirve la /api (tests). */
   webDist?: string
   logger?: boolean
 }
 
-export async function buildApp({ db, auth, sessionSecret, getStatus, push, webDist, logger = false }: AppOptions) {
+export async function buildApp({ db, auth, sessionSecret, getStatus, push, usdaApiKey, webDist, logger = false }: AppOptions) {
   const app = Fastify({ logger })
 
   await app.register(fastifyCookie, { secret: sessionSecret })
@@ -41,6 +44,7 @@ export async function buildApp({ db, auth, sessionSecret, getStatus, push, webDi
   })
 
   registerBackupRoutes(app, db)
+  registerFoodRoutes(app, { usdaApiKey })
 
   if (push) registerPushRoutes(app, push)
   else app.all('/api/push/*', async (_req, reply) => reply.code(503).send({ error: 'push_disabled' }))

@@ -4,12 +4,12 @@ import { CalendarDays, Dumbbell, Plus, Server, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { db } from '../../db/db'
-import { useGoals } from '../../db/settings'
+import { dateKey, sumNutrients } from '../food/data'
+import { DaySummary } from '../food/DaySummary'
+import { useDayEntries } from '../food/hooks'
 import { ActiveWorkoutCard } from '../gym/ActiveWorkoutCard'
 import { useActiveWorkout } from '../gym/hooks'
 import { IconBadge } from '../../ui/IconBadge'
-import { MacroBars } from '../../ui/MacroBars'
-import { ProgressRing } from '../../ui/ProgressRing'
 import { TabPage } from '../../ui/TabPage'
 import { useServerHealth } from '../server/useServerHealth'
 import { readCachedStatus } from '../server/useServerStatus'
@@ -17,13 +17,10 @@ import { Navbar } from '../../ui/Navbar'
 
 const HEALTH_DOT = { checking: 'bg-label-2', online: 'bg-food', offline: 'bg-danger' } as const
 
-// Lo consumido llegará con el registro de comidas (fase 5); por ahora el día empieza en cero.
-const EATEN = { kcal: 0, protein: 0, carbs: 0, fat: 0 }
-
 export function TodayPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const goals = useGoals()
+  const entries = useDayEntries(dateKey(new Date())) ?? []
   const health = useServerHealth()
   // Temperatura de la última lectura guardada (la pestaña Server la actualiza).
   const cachedStatus = readCachedStatus()?.status
@@ -37,7 +34,6 @@ export function TodayPage() {
       .count(),
   )
   const date = new Intl.DateTimeFormat(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())
-  const kcalLeft = Math.max(goals.kcal - EATEN.kcal, 0)
   const gymStatus = activeWorkout ? t('today.gymInProgress') : workoutsToday ? t('today.gymDone') : t('today.noWorkout')
 
   return (
@@ -58,13 +54,7 @@ export function TodayPage() {
 
       {activeWorkout && <ActiveWorkoutCard workout={activeWorkout} />}
 
-      <Block strong inset className="flex items-center gap-5">
-        <ProgressRing progress={EATEN.kcal / goals.kcal} colorClassName="text-food">
-          <span className="text-[28px] font-bold leading-none tabular-nums">{kcalLeft.toLocaleString(i18n.language)}</span>
-          <span className="mt-1 text-[12px] text-label-2">{t('today.kcalLeft')}</span>
-        </ProgressRing>
-        <MacroBars eaten={EATEN} goals={goals} />
-      </Block>
+      <DaySummary eaten={sumNutrients(entries)} />
 
       <List strong inset dividers>
         <ListItem

@@ -2,6 +2,7 @@ import { App, Tabbar, TabbarLink } from 'konsta/react'
 import { Apple, CalendarDays, Dumbbell, House, Server } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
+import { FoodPage } from '../features/food/FoodPage'
 import { ActiveWorkoutPage } from '../features/gym/ActiveWorkoutPage'
 import { ExercisePage } from '../features/gym/ExercisePage'
 import { ExercisesPage } from '../features/gym/ExercisesPage'
@@ -35,7 +36,7 @@ export function AppShell() {
     <App theme="ios" dark safeAreas>
       <Routes>
         <Route path="/" element={<TodayPage />} />
-        <Route path="/food" element={<PlaceholderPage tone="food" Icon={Apple} />} />
+        <Route path="/food" element={<FoodPage />} />
         <Route path="/gym" element={<GymPage />} />
         <Route path="/gym/session" element={<ActiveWorkoutPage />} />
         <Route path="/gym/routines/:id" element={<RoutinePage />} />

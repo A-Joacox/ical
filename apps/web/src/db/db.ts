@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie'
 import { SEED_EXERCISES } from '../features/gym/seedExercises'
+import type { Food, FoodEntry } from '../features/food/types'
 import type { Exercise, Routine, RoutineExercise, Workout, WorkoutSet } from '../features/gym/types'
 
 // Base de datos local (IndexedDB). Cada módulo añade sus tablas con una nueva db.version().
@@ -12,6 +13,8 @@ export const db = new Dexie('self-grow') as Dexie & {
   routineExercises: EntityTable<RoutineExercise, 'id'>
   workouts: EntityTable<Workout, 'id'>
   workoutSets: EntityTable<WorkoutSet, 'id'>
+  foods: EntityTable<Food, 'id'>
+  foodEntries: EntityTable<FoodEntry, 'id'>
 }
 
 db.version(1).stores({
@@ -24,6 +27,11 @@ db.version(2).stores({
   routineExercises: 'id, routineId',
   workouts: 'id, startedAt',
   workoutSets: 'id, workoutId, exerciseId',
+})
+
+db.version(3).stores({
+  foods: 'id, barcode',
+  foodEntries: 'id, date',
 })
 
 // Añade los ejercicios precargados que falten (también los que se agreguen en versiones futuras).

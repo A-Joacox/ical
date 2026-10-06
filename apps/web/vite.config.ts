@@ -13,7 +13,7 @@ export default defineConfig({
       filename: 'sw.ts',
       registerType: 'autoUpdate',
       pwaAssets: { config: true, overrideManifestIcons: true },
-      injectManifest: { globPatterns: ['**/*.{js,css,html,svg,png,ico}'] },
+      injectManifest: { globPatterns: ['**/*.{js,css,html,svg,png,ico,wasm}'] },
       manifest: {
         name: 'Self Grow',
         short_name: 'Self Grow',
