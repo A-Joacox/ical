@@ -164,6 +164,24 @@
     "quotaExceeded": "Se acabó la cuota gratuita de Gemini por ahora. Inténtalo más tarde.",
     "photoFailed": "No se pudo analizar la foto. Inténtalo de nuevo."
   },
+  "agenda": {
+    "today": "Hoy",
+    "tomorrow": "Mañana",
+    "yesterday": "Ayer",
+    "allDay": "Todo el día",
+    "empty": "Sin eventos este día.",
+    "untitled": "(Sin título)",
+    "calendar": "Calendario {{n}}",
+    "newEvent": "Nuevo evento",
+    "scheduleWorkout": "Agendar entrenamiento",
+    "workoutTitle": "Gym 💪",
+    "updated": "Actualizado a las {{time}}",
+    "cachedAt": "Sin conexión · datos de las {{time}}",
+    "disabled": "Falta configurar tus calendarios en el server (CALENDAR_ICS_URLS).",
+    "signIn": "Inicia sesión en Ajustes para ver tu agenda.",
+    "unavailable": "Google Calendar no responde.",
+    "someFailed": "un calendario no se pudo leer"
+  },
   "muscles": {
     "chest": "Pecho",
     "back": "Espalda",
@@ -230,10 +248,6 @@
     "mediaCredit": "Imágenes: free-exercise-db (dominio público)",
     "restDoneTitle": "Descanso terminado",
     "restDoneBody": "Hora de la siguiente serie 💪"
-  },
-  "placeholder": {
-    "soon": "Próximamente",
-    "agenda": "Tus eventos de Google Calendar."
   },
   "settings": {
     "title": "Ajustes",

@@ -39,6 +39,7 @@ const app = await buildApp({
   getStatus,
   push,
   usdaApiKey: env.USDA_API_KEY,
+  calendarUrls: (env.CALENDAR_ICS_URLS ?? '').split(/[\s,]+/).filter(Boolean),
   gemini: env.GEMINI_API_KEY ? { apiKey: env.GEMINI_API_KEY, model: env.GEMINI_MODEL || 'gemini-flash-latest' } : undefined,
   webDist,
   logger: true,

@@ -2,6 +2,7 @@ import { App, Tabbar, TabbarLink } from 'konsta/react'
 import { Apple, CalendarDays, Dumbbell, House, Server } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
+import { AgendaPage } from '../features/agenda/AgendaPage'
 import { FoodPage } from '../features/food/FoodPage'
 import { ActiveWorkoutPage } from '../features/gym/ActiveWorkoutPage'
 import { ExercisePage } from '../features/gym/ExercisePage'
@@ -12,7 +13,6 @@ import { WorkoutPage } from '../features/gym/WorkoutPage'
 import { ServerPage } from '../features/server/ServerPage'
 import { SettingsPage } from '../features/settings/SettingsPage'
 import { TodayPage } from '../features/today/TodayPage'
-import { PlaceholderPage } from '../ui/PlaceholderPage'
 
 const TABS = [
   { path: '/', label: 'tabs.today', Icon: House },
@@ -43,7 +43,7 @@ export function AppShell() {
         <Route path="/gym/workouts/:id" element={<WorkoutPage />} />
         <Route path="/gym/exercises" element={<ExercisesPage />} />
         <Route path="/gym/exercises/:id" element={<ExercisePage />} />
-        <Route path="/agenda" element={<PlaceholderPage tone="agenda" Icon={CalendarDays} />} />
+        <Route path="/agenda" element={<AgendaPage />} />
         <Route path="/server" element={<ServerPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

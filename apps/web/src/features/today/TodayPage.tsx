@@ -4,7 +4,10 @@ import { CalendarDays, Dumbbell, Plus, Server, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { db } from '../../db/db'
-import { dateKey, sumNutrients } from '../food/data'
+import { dateKey, startOfWeek } from '../../dates'
+import { nextEventToday } from '../agenda/events'
+import { useCalendarWeek } from '../agenda/useCalendarWeek'
+import { sumNutrients } from '../food/data'
 import { DaySummary } from '../food/DaySummary'
 import { useDayEntries } from '../food/hooks'
 import { ActiveWorkoutCard } from '../gym/ActiveWorkoutCard'
@@ -20,7 +23,11 @@ const HEALTH_DOT = { checking: 'bg-label-2', online: 'bg-food', offline: 'bg-dan
 export function TodayPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const entries = useDayEntries(dateKey(new Date())) ?? []
+  const today = dateKey(new Date())
+  const entries = useDayEntries(today) ?? []
+  const agenda = useCalendarWeek(startOfWeek(today))
+  const nextEvent = nextEventToday(agenda.data?.events ?? [], today, Date.now())
+  const eventTime = (iso: string) => new Intl.DateTimeFormat(i18n.language, { timeStyle: 'short' }).format(new Date(iso))
   const health = useServerHealth()
   // Temperatura de la última lectura guardada (la pestaña Server la actualiza).
   const cachedStatus = readCachedStatus()?.status
@@ -67,7 +74,7 @@ export function TodayPage() {
         <ListItem
           link
           title={t('tabs.agenda')}
-          after={t('today.noEvents')}
+          after={nextEvent ? (nextEvent.allDay ? nextEvent.title : `${eventTime(nextEvent.start)} · ${nextEvent.title}`) : t('today.noEvents')}
           media={<IconBadge Icon={CalendarDays} tone="agenda" />}
           onClick={() => navigate('/agenda')}
         />

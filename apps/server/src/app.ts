@@ -5,6 +5,7 @@ import fastifyRateLimit from '@fastify/rate-limit'
 import fastifyStatic from '@fastify/static'
 import { registerAuth, type AuthConfig } from './auth.ts'
 import { registerBackupRoutes } from './backup.ts'
+import { registerCalendarRoutes } from './calendar.ts'
 import { registerFoodRoutes } from './food.ts'
 import type { Gemini } from './foodPhoto.ts'
 import type { ServerStatus } from './glances.ts'
@@ -22,12 +23,14 @@ export type AppOptions = {
   usdaApiKey?: string
   /** Análisis de fotos de comida; sin clave, /api/food/analyze responde 503. */
   gemini?: Gemini
+  /** Direcciones secretas iCal de Google Calendar; sin ellas, /api/calendar/* responde 503. */
+  calendarUrls?: string[]
   /** Carpeta con la PWA compilada; sin ella solo se sirve la /api (tests). */
   webDist?: string
   logger?: boolean
 }
 
-export async function buildApp({ db, auth, sessionSecret, getStatus, push, usdaApiKey, gemini, webDist, logger = false }: AppOptions) {
+export async function buildApp({ db, auth, sessionSecret, getStatus, push, usdaApiKey, gemini, calendarUrls = [], webDist, logger = false }: AppOptions) {
   const app = Fastify({ logger })
 
   await app.register(fastifyCookie, { secret: sessionSecret })
@@ -48,6 +51,7 @@ export async function buildApp({ db, auth, sessionSecret, getStatus, push, usdaA
 
   registerBackupRoutes(app, db)
   registerFoodRoutes(app, { usdaApiKey, gemini })
+  registerCalendarRoutes(app, { urls: calendarUrls })
 
   if (push) registerPushRoutes(app, push)
   else app.all('/api/push/*', async (_req, reply) => reply.code(503).send({ error: 'push_disabled' }))

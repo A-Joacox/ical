@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
-import { addDays, dateKey, per100, recipeValues, scaleNutrients, sumNutrients } from './data'
+import { addDays, dateKey, startOfWeek } from '../../dates'
+import { per100, recipeValues, scaleNutrients, sumNutrients } from './data'
 import type { FoodEntry } from './types'
 
 describe('nutrientes', () => {
@@ -40,5 +41,9 @@ describe('fechas', () => {
     expect(dateKey(new Date(2026, 9, 5, 23, 59))).toBe('2026-10-05')
     expect(addDays('2026-10-01', -1)).toBe('2026-09-30')
     expect(addDays('2026-12-31', 1)).toBe('2027-01-01')
+    // Semana de lunes a domingo.
+    expect(startOfWeek('2026-10-07')).toBe('2026-10-05')
+    expect(startOfWeek('2026-10-11')).toBe('2026-10-05')
+    expect(startOfWeek('2026-10-05')).toBe('2026-10-05')
   })
 })

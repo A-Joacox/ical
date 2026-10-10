@@ -1,3 +1,4 @@
+import { dateKey } from '../../dates'
 import { db, newRow } from '../../db/db'
 import { normalize } from '../../text'
 import type { FoodResult } from './api'
@@ -23,15 +24,6 @@ export const sumNutrients = (items: Nutrients[]): Nutrients =>
 
 /** Valores por 100 g de una entrada (se guarda con los nutrientes ya multiplicados). */
 export const per100 = (entry: FoodEntry) => scaleNutrients(entry, 100 / entry.grams)
-
-/** Día local como "AAAA-MM-DD". */
-export const dateKey = (date: Date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-
-export function addDays(key: string, days: number) {
-  const [y, m, d] = key.split('-').map(Number)
-  return dateKey(new Date(y, m - 1, d + days))
-}
 
 // ---------- Medidas ----------
 

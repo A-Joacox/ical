@@ -164,6 +164,24 @@
     "quotaExceeded": "The free Gemini quota is used up for now. Try again later.",
     "photoFailed": "Couldn't analyze the photo. Please try again."
   },
+  "agenda": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "yesterday": "Yesterday",
+    "allDay": "All day",
+    "empty": "No events this day.",
+    "untitled": "(No title)",
+    "calendar": "Calendar {{n}}",
+    "newEvent": "New event",
+    "scheduleWorkout": "Schedule workout",
+    "workoutTitle": "Gym 💪",
+    "updated": "Updated at {{time}}",
+    "cachedAt": "Offline · data from {{time}}",
+    "disabled": "Your calendars are not set up on the server (CALENDAR_ICS_URLS).",
+    "signIn": "Sign in under Settings to see your calendar.",
+    "unavailable": "Google Calendar isn't responding.",
+    "someFailed": "one calendar couldn't be read"
+  },
   "muscles": {
     "chest": "Chest",
     "back": "Back",
@@ -230,10 +248,6 @@
     "mediaCredit": "Images: free-exercise-db (public domain)",
     "restDoneTitle": "Rest is over",
     "restDoneBody": "Time for your next set 💪"
-  },
-  "placeholder": {
-    "soon": "Coming soon",
-    "agenda": "Your Google Calendar events."
   },
   "settings": {
     "title": "Settings",
